@@ -18,8 +18,10 @@ function ProfileCard({ member }) {
         ) : (
           <div className="profile-photo-placeholder">{initials}</div>
         )}
-        <div className="profile-name">{member.name}</div>
-        {member.title && <div className="profile-title">{member.title}</div>}
+        <div className="profile-info">
+          <div className="profile-name">{member.name}</div>
+          {member.title && <div className="profile-title">{member.title}</div>}
+        </div>
       </div>
 
       {member.bio && (
