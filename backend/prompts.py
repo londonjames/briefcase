@@ -38,24 +38,24 @@ PROFILE_EXTRACTION_PROMPT = """Extract structured information from this person's
 Person: {name} — {title}
 
 Return ONLY valid JSON in this exact format:
-{
+{{
   "bio": "Full biography text as a single string",
   "education": [
-    {
+    {{
       "school": "University Name",
       "degree": "Degree type and field",
       "honors": "Any honors, distinctions, or notable details (null if none)"
-    }
+    }}
   ],
   "career": [
-    {
+    {{
       "company": "Company Name",
       "role": "Role/Position",
       "details": "Any additional details (null if none)"
-    }
+    }}
   ],
   "personal": ["Interest or personal detail 1", "Interest or personal detail 2"]
-}
+}}
 
 Important:
 - Extract the full bio text, not a summary
