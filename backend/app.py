@@ -113,6 +113,23 @@ def export_to_notion(job_id):
         return jsonify({"error": f"Notion export failed: {str(e)}"}), 500
 
 
+@app.route("/api/debug-fetch", methods=["POST"])
+def debug_fetch():
+    """Debug: fetch a URL and return info about what we get."""
+    from scraper import fetch_page
+    data = request.get_json()
+    url = data.get("url", "")
+    try:
+        html = fetch_page(url)
+        return jsonify({
+            "length": len(html),
+            "first_500": html[:500],
+            "has_content": len(html) > 1000,
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)})
+
+
 @app.route("/api/health", methods=["GET"])
 def health():
     return jsonify({"status": "ok"})
