@@ -72,21 +72,22 @@ function Progress({ progress, step, status }) {
       <div className="progress-detail-area">
         {!isPhase2 ? (
           <>
-            <div className="progress-detail">
-              {profileCurrent !== null ? (
-                <>
+            {profileCurrent !== null ? (
+              <>
+                <div className="progress-detail">
                   <span className="progress-spinner" />
                   {profileCurrent} <span className="progress-detail-dim">/ {profileTotal}</span>
-                </>
-              ) : (
-                <>
+                </div>
+                <div className="progress-subtext">profiles pulled</div>
+              </>
+            ) : (
+              <>
+                <div className="progress-detail">
                   <span className="progress-spinner" />
-                  <span className="progress-detail-small">Analyzing team page…</span>
-                </>
-              )}
-            </div>
-            {profileCurrent !== null && (
-              <div className="progress-subtext">profiles pulled</div>
+                  <span className="progress-detail-small">{step || 'Starting…'}</span>
+                </div>
+                <div className="progress-subtext">{displayProgress}%</div>
+              </>
             )}
           </>
         ) : (
