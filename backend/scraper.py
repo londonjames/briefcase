@@ -1,4 +1,5 @@
 import requests
+import cloudscraper
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urlparse
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -23,14 +24,21 @@ HEADERS = {
 
 
 def fetch_page(url, retries=2):
-    """Fetch a web page and return its HTML content."""
+    """Fetch a web page and return its HTML content.
+    Falls back to cloudscraper for Cloudflare-protected pages."""
     for attempt in range(retries + 1):
         try:
             resp = requests.get(url, headers=HEADERS, timeout=30, allow_redirects=True)
             resp.raise_for_status()
             return resp.text
         except requests.exceptions.HTTPError as e:
-            if attempt < retries and resp.status_code in (403, 429, 503):
+            if resp.status_code == 403:
+                # Cloudflare or similar — try cloudscraper
+                scraper = cloudscraper.create_scraper()
+                resp2 = scraper.get(url, timeout=30)
+                resp2.raise_for_status()
+                return resp2.text
+            if attempt < retries and resp.status_code in (429, 503):
                 import time
                 time.sleep(2 * (attempt + 1))
                 continue

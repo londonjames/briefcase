@@ -2,6 +2,7 @@ Flask==3.0.0
 Flask-CORS==4.0.0
 anthropic==0.42.0
 requests==2.31.0
+cloudscraper==1.2.71
 beautifulsoup4==4.12.3
 gunicorn==21.2.0
 python-dotenv==1.0.1
