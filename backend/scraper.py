@@ -146,29 +146,35 @@ def scrape_team(url, progress_callback=None):
     if progress_callback:
         progress_callback(20, f"Found {total_members} team members. Fetching individual profiles...")
 
-    # Fetch all individual profiles in parallel
+    # Fetch all individual profiles in parallel (track index to preserve order)
     all_members = []
     for group in groups:
-        all_members.extend([(group["name"], m) for m in group.get("members", [])])
+        for idx, m in enumerate(group.get("members", [])):
+            all_members.append((group["name"], idx, m))
 
     completed = 0
     enriched_groups = {g["name"]: [] for g in groups}
 
-    def fetch_and_track(group_name, member):
-        return group_name, fetch_profile(member)
+    def fetch_and_track(group_name, idx, member):
+        return group_name, idx, fetch_profile(member)
 
     with ThreadPoolExecutor(max_workers=10) as executor:
         futures = {
-            executor.submit(fetch_and_track, gn, m): (gn, m)
-            for gn, m in all_members
+            executor.submit(fetch_and_track, gn, idx, m): (gn, idx, m)
+            for gn, idx, m in all_members
         }
         for future in as_completed(futures):
-            group_name, enriched_member = future.result()
-            enriched_groups[group_name].append(enriched_member)
+            group_name, idx, enriched_member = future.result()
+            enriched_groups[group_name].append((idx, enriched_member))
             completed += 1
             if progress_callback:
                 pct = 20 + int((completed / total_members) * 50)
                 progress_callback(pct, f"Fetching profiles ({completed}/{total_members})...")
+
+    # Sort each group by original index to preserve page order
+    for group_name in enriched_groups:
+        enriched_groups[group_name].sort(key=lambda x: x[0])
+        enriched_groups[group_name] = [m for _, m in enriched_groups[group_name]]
 
     # Reconstruct groups with enriched data
     result_groups = []

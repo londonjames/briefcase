@@ -43,6 +43,7 @@ def run_pipeline(job_id, url):
             "team_count": team_data["team_count"],
             "groups": team_data["groups"],
             "insights": insights,
+            "source_url": url,
         }
 
         job["result"] = result

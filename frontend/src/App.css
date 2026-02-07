@@ -183,6 +183,7 @@ body {
 }
 
 .dossier-header {
+  margin-top: 1rem;
   margin-bottom: 2rem;
   padding-bottom: 1.5rem;
   border-bottom: 1px solid var(--border);
@@ -200,22 +201,32 @@ body {
   color: var(--text-dim);
 }
 
-/* Tabs */
+.dossier-source-link {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.dossier-source-link:hover {
+  text-decoration: underline;
+}
+
+/* Tabs — primary navigation */
 .dossier-tabs {
   display: flex;
   gap: 0;
-  margin-bottom: 1.5rem;
   border-bottom: 1px solid var(--border);
 }
 
 .tab-btn {
-  padding: 0.75rem 1.5rem;
+  padding: 1rem 1.75rem;
   background: transparent;
   border: none;
   border-bottom: 2px solid transparent;
   color: var(--text-dim);
   font-family: var(--sans);
-  font-size: 0.9rem;
+  font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
@@ -323,7 +334,7 @@ body {
 /* Profile cards */
 .profile-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
 }
 
@@ -384,39 +395,12 @@ body {
   line-height: 1.5;
 }
 
-.profile-details summary {
-  cursor: pointer;
-  color: var(--text-muted);
-  font-size: 0.75rem;
-  margin-top: 0.5rem;
-  list-style: none;
-}
-
-.profile-details summary::-webkit-details-marker {
-  display: none;
-}
-
-.profile-details summary::before {
-  content: '+ more';
-}
-
-.profile-details[open] summary::before {
-  content: '- less';
-}
 
 .profile-bio {
   margin-top: 0.5rem;
   font-size: 0.8rem;
   color: var(--text-dim);
   line-height: 1.6;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.profile-bio-full {
-  -webkit-line-clamp: unset;
 }
 
 .profile-section-label {

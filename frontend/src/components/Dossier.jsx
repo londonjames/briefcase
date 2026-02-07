@@ -5,20 +5,11 @@ import InsightSection from './InsightSection'
 function Dossier({ data, onReset, onExportNotion }) {
   const [activeTab, setActiveTab] = useState('team')
 
-  // Flatten all members across groups, sort alphabetically
-  const allMembers = data.groups
-    .flatMap((g) => g.members)
-    .sort((a, b) => a.name.localeCompare(b.name))
+  // Flatten all members across groups, preserve original order
+  const allMembers = data.groups.flatMap((g) => g.members)
 
   return (
     <div className="dossier">
-      <div className="dossier-header">
-        <h2 className="dossier-company">{data.company}</h2>
-        <div className="dossier-meta">
-          {data.team_count} members
-        </div>
-      </div>
-
       <div className="dossier-tabs">
         <button
           className={`tab-btn ${activeTab === 'team' ? 'tab-active' : ''}`}
@@ -32,6 +23,26 @@ function Dossier({ data, onReset, onExportNotion }) {
         >
           Insights
         </button>
+      </div>
+
+      <div className="dossier-header">
+        <h2 className="dossier-company">{data.company}</h2>
+        <div className="dossier-meta">
+          {data.team_count} members
+          {data.source_url && (
+            <>
+              {' · '}
+              <a
+                className="dossier-source-link"
+                href={data.source_url}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {data.source_url}
+              </a>
+            </>
+          )}
+        </div>
       </div>
 
       {activeTab === 'team' && (

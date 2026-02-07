@@ -64,48 +64,69 @@ Important:
 - Personal details include hobbies, interests, side projects, quirks mentioned in the bio
 - If a section has no data, use an empty array []"""
 
-ANALYSIS_PROMPT = """You are analyzing a team of {team_count} people at {company}. Your job is to produce an extremely specific, opinionated, name-dropping team dossier.
+ANALYSIS_PROMPT = """You are an intelligence analyst producing a classified-feel team dossier on {team_count} people at {company}. Your job is to find what others miss — hidden patterns, power dynamics, cultural tells, and standout individuals. Be EXTREMELY specific: reference people BY NAME, give exact counts and percentages, and surface non-obvious connections.
 
 Here is the structured data for every team member:
 
 {team_data}
 
-Produce analysis in the following sections. Each section should be a JSON object with "title" and "content" (markdown string). Be EXTREMELY specific — reference individuals BY NAME, give exact counts, percentages, and specific details. Do NOT be generic. Find non-obvious patterns.
+Produce analysis in the following 6 sections. Each section should be a JSON object with "title" and "content" (markdown string). The first 4 sections should read like intelligence analysis — opinionated, sharp, surprising. The last 2 are structured reference sections.
 
 Sections to produce:
 
-1. **Academic Backgrounds**
-   - MBA programs: school-by-school breakdown with names (e.g., "Harvard Business School (8): Kent Bennett, Sarah Smith...")
-   - Undergraduate institutions: school-by-school with names
-   - Advanced degrees (PhDs, JDs, MDs) with names
-   - Notable academic achievements, scholarships, honors
-   - What percentage have MBAs? From which tier of schools?
+1. **Hidden Patterns & Non-Obvious Connections**
+   Write this like an intelligence briefing. Find cross-cutting patterns that aren't visible at first glance:
+   - Unexpected clusters: people who share obscure alma maters, worked at the same company in overlapping years, or have parallel career arcs
+   - Network overlaps: board connections, co-investments, shared mentors or professional circles
+   - Surprising gaps: what's conspicuously absent from this team (geographies, industries, backgrounds, skill sets)?
+   - Timing patterns: did hiring waves coincide with fund cycles, market events, or leadership changes?
+   - Name individuals and draw specific connections between them.
 
-2. **Prior Employers & Career Paths**
-   - Most common prior employers with exact counts and names
-   - Consulting pipeline (McKinsey, BCG, Bain alumni with names)
-   - Banking pipeline (Goldman, Morgan Stanley, etc.)
-   - Tech company alumni (Google, Meta, etc.)
-   - Founder/operator-turned-investor paths
-   - Most unusual career pivots
+2. **The Standouts**
+   Profile the most interesting individuals on the team — people who break the mold:
+   - Unusual career pivots (e.g., military to VC, academia to operator, journalist to investor)
+   - Multi-hyphenates with rare skill combinations
+   - Founder/operator-turned-investors and what they built
+   - Notable personal achievements (Olympians, published authors, patent holders, elected officials)
+   - Rising stars: junior people with outsized backgrounds
+   - For each standout, write 2-3 sentences explaining what makes them distinctive. Name at least 4-6 individuals.
 
-3. **Deeper Insights**
-   - Gender distribution: exact counts at each seniority level (Partner, Principal, VP, etc.)
-   - Geographic patterns if detectable
-   - Industry specialization clusters
-   - Non-obvious career path patterns
-   - Content creators / thought leaders (publications, podcasts, boards)
-   - Founders who became investors
+3. **Power Dynamics & Influence Map**
+   Analyze the team's internal power structure and external influence:
+   - Seniority pyramid: exact counts at each level (Partner, Principal, VP, Associate, etc.)
+   - Who are the connectors? People with the most external board seats, advisory roles, or public presence
+   - Thought leadership: podcasts, publications, frequent speakers, Twitter/X presence
+   - Mentorship pipelines: evidence of internal promotion patterns vs. external hires at senior levels
+   - Decision-making concentration: is power distributed or concentrated among a few?
+   - Name specific people in each category.
 
-4. **Nuances & Quirks**
-   - Personal interests that stand out (athletes, musicians, unusual hobbies)
-   - Unexpected clusters (e.g., "3 people who ran marathons")
-   - Multi-hyphenates (people with unusual skill combinations)
-   - Published researchers or authors
-   - Cultural patterns, community involvement
+4. **Cultural DNA**
+   Read the tea leaves — what does this team's composition reveal about the organization's values and identity?
+   - Dominant archetypes: what "type" of person does this firm hire? (e.g., ex-consultants, technical founders, pedigree collectors)
+   - What the personal interests reveal: are there clusters around athletics, arts, activism, or something else?
+   - Conspicuous absences: what kinds of people or backgrounds are noticeably missing?
+   - If you had to describe this team's personality in one sentence, what would it be?
+   - Be opinionated. This section should have a strong point of view.
 
-For smaller teams (<20 people), be more personal and mention almost everyone by name.
-For larger teams (50+), focus on statistical patterns but still name standouts.
+5. **Career Trajectories**
+   Structured breakdown of how these people got here:
+   - Education: MBA programs school-by-school with names (e.g., "Harvard Business School (8): Kent Bennett, Sarah Smith..."). What percentage have MBAs? Undergraduate institutions with names. Advanced degrees (PhDs, JDs, MDs) with names.
+   - Consulting pipeline: McKinsey, BCG, Bain alumni with names and counts
+   - Banking pipeline: Goldman, Morgan Stanley, etc. with names and counts
+   - Tech company alumni: Google, Meta, etc. with names and counts
+   - Founder/operator paths: who built companies before joining?
+   - Most unusual career pivots with brief descriptions
+
+6. **Team Composition Dashboard**
+   Factual reference section with hard numbers:
+   - Gender breakdown: exact counts and percentages, broken down by seniority level
+   - Geographic patterns if detectable (office locations, regional backgrounds)
+   - Industry specialization clusters with names
+   - Tenure patterns if detectable (long-timers vs. recent hires)
+   - Team size by group/function
+
+For smaller teams (<20 people), be deeply personal and mention almost everyone by name.
+For larger teams (50+), lead with statistical patterns but still name standouts.
 
 Return ONLY valid JSON as an array of objects:
 [
@@ -115,4 +136,4 @@ Return ONLY valid JSON as an array of objects:
   }}
 ]
 
-Make the content rich, detailed, and genuinely insightful. This should read like a well-researched analyst report, not a generic summary."""
+This should read like a compelling, opinionated intelligence report — not a formulaic HR summary. Surprise the reader. Make them feel like they have an unfair advantage after reading this."""
