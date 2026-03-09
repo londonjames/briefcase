@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import UrlForm from './components/UrlForm'
 import Progress from './components/Progress'
 import Dossier from './components/Dossier'
@@ -13,6 +14,7 @@ const getApiUrl = () => {
 const API_URL = getApiUrl()
 
 function App() {
+  const navigate = useNavigate()
   const [view, setView] = useState('form') // form | progress | dossier
   const [jobId, setJobId] = useState(null)
   const [progress, setProgress] = useState({ progress: 0, step: '', status: 'pending' })
@@ -56,7 +58,14 @@ function App() {
       })
 
       if (data.status === 'complete') {
-        setDossier(data.result)
+        const result = data.result
+        setDossier(result)
+        // Navigate to shareable URL if slug is available
+        if (result.slug) {
+          localStorage.setItem(`briefcase:${result.slug}`, JSON.stringify(result))
+          navigate(`/${result.slug}`, { replace: true })
+          return
+        }
         setView('dossier')
       } else if (data.status === 'error') {
         setError(data.step)

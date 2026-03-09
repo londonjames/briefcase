@@ -1,6 +1,8 @@
 import os
+import re
 import uuid
 import threading
+from datetime import datetime
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from dotenv import load_dotenv
@@ -16,6 +18,9 @@ CORS(app)
 
 # In-memory job store
 jobs = {}
+
+# Slug-based result store: "company/date" -> result
+slug_store = {}
 
 
 def run_pipeline(job_id, url):
@@ -45,6 +50,13 @@ def run_pipeline(job_id, url):
             "insights": insights,
             "source_url": url,
         }
+
+        # Generate slug: lowercase company name + date
+        company_slug = re.sub(r'[^a-z0-9]+', '-', team_data["company"].lower()).strip('-')
+        date_slug = datetime.now().strftime("%-d%B%Y")  # e.g. 9March2026
+        slug = f"{company_slug}/{date_slug}"
+        result["slug"] = slug
+        slug_store[slug] = result
 
         job["result"] = result
         job["status"] = "complete"
@@ -96,6 +108,15 @@ def get_dossier(job_id):
         "step": job["step"],
         "result": job["result"],
     })
+
+
+@app.route("/api/dossier/by-slug/<path:slug>", methods=["GET"])
+def get_dossier_by_slug(slug):
+    """Retrieve a completed dossier by its slug (company/date)."""
+    result = slug_store.get(slug)
+    if not result:
+        return jsonify({"error": "Dossier not found"}), 404
+    return jsonify({"result": result})
 
 
 @app.route("/api/dossier/<job_id>/export-notion", methods=["POST"])
