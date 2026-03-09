@@ -1,11 +1,13 @@
 import os
 import re
+import json
 import uuid
 import threading
 from datetime import datetime
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from dotenv import load_dotenv
+import requests as http_requests
 
 load_dotenv()
 
@@ -19,8 +21,44 @@ CORS(app)
 # In-memory job store
 jobs = {}
 
-# Slug-based result store: "company/date" -> result
-slug_store = {}
+# Upstash Redis REST client (reuses Profiler's instance with briefcase: prefix)
+UPSTASH_URL = os.environ.get("UPSTASH_REDIS_REST_URL", "")
+UPSTASH_TOKEN = os.environ.get("UPSTASH_REDIS_REST_TOKEN", "")
+
+
+def redis_set(key, value):
+    """Store a value in Upstash Redis via REST API."""
+    if not UPSTASH_URL or not UPSTASH_TOKEN:
+        return False
+    try:
+        resp = http_requests.post(
+            f"{UPSTASH_URL}/set/briefcase:{key}",
+            headers={"Authorization": f"Bearer {UPSTASH_TOKEN}"},
+            json=json.dumps(value),
+        )
+        return resp.status_code == 200
+    except Exception as e:
+        print(f"Redis SET error: {e}")
+        return False
+
+
+def redis_get(key):
+    """Retrieve a value from Upstash Redis via REST API."""
+    if not UPSTASH_URL or not UPSTASH_TOKEN:
+        return None
+    try:
+        resp = http_requests.get(
+            f"{UPSTASH_URL}/get/briefcase:{key}",
+            headers={"Authorization": f"Bearer {UPSTASH_TOKEN}"},
+        )
+        if resp.status_code == 200:
+            data = resp.json()
+            if data.get("result"):
+                return json.loads(data["result"])
+        return None
+    except Exception as e:
+        print(f"Redis GET error: {e}")
+        return None
 
 
 def run_pipeline(job_id, url):
@@ -56,7 +94,8 @@ def run_pipeline(job_id, url):
         date_slug = datetime.now().strftime("%-d%B%Y")  # e.g. 9March2026
         slug = f"{company_slug}/{date_slug}"
         result["slug"] = slug
-        slug_store[slug] = result
+        # Persist to Redis (survives redeploys) and in-memory cache
+        redis_set(slug, result)
 
         job["result"] = result
         job["status"] = "complete"
@@ -113,7 +152,7 @@ def get_dossier(job_id):
 @app.route("/api/dossier/by-slug/<path:slug>", methods=["GET"])
 def get_dossier_by_slug(slug):
     """Retrieve a completed dossier by its slug (company/date)."""
-    result = slug_store.get(slug)
+    result = redis_get(slug)
     if not result:
         return jsonify({"error": "Dossier not found"}), 404
     return jsonify({"result": result})
