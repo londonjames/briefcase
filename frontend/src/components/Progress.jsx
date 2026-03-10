@@ -5,7 +5,8 @@ function Progress({ progress, step, status }) {
   const phase2StartRef = useRef(null)
   const timerRef = useRef(null)
 
-  const isPhase2 = progress >= 75
+  const safeProgress = typeof progress === 'number' && !isNaN(progress) ? progress : 0
+  const isPhase2 = safeProgress >= 75
 
   // Start/stop elapsed timer for phase 2
   useEffect(() => {
@@ -29,18 +30,16 @@ function Progress({ progress, step, status }) {
   const countMatch = step?.match(/\((\d+)\/(\d+)\)/)
   const profileCurrent = countMatch ? parseInt(countMatch[1], 10) : null
   const profileTotal = countMatch ? parseInt(countMatch[2], 10) : null
-
-  // Map backend progress to display progress
   let displayProgress
   if (!isPhase2) {
     // Backend 0-70 → display 0-50
-    displayProgress = Math.round((Math.min(progress, 70) / 70) * 50)
+    displayProgress = Math.round((Math.min(safeProgress, 70) / 70) * 50)
   } else {
     // Backend 75-95 → display 50-95
-    const phase2Pct = Math.min(Math.max(progress - 75, 0), 20) / 20
+    const phase2Pct = Math.min(Math.max(safeProgress - 75, 0), 20) / 20
     displayProgress = Math.round(50 + phase2Pct * 45)
   }
-  if (progress >= 100) displayProgress = 100
+  if (safeProgress >= 100) displayProgress = 100
 
   const formatTime = (s) => {
     const m = Math.floor(s / 60)
