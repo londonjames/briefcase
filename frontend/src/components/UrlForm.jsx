@@ -41,7 +41,7 @@ function UrlForm({ onSubmit, error }) {
         <Link to="/linkedin/10March2026">LinkedIn</Link>,{' '}
         <Link to="/meta/10March2026">Meta</Link>,{' '}
         <Link to="/nvidia/10March2026">NVIDIA</Link>,{' '}
-        <Link to="/PLACEHOLDER_Z">Z</Link>
+        <Link to="/apple/10March2026">Apple</Link>
       </p>
       {error && <p className="form-error">{error}</p>}
     </form>
