@@ -1,3 +1,5 @@
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002/api'
+
 function ProfileCard({ member }) {
   const initials = member.name
     .split(' ')
@@ -5,13 +7,17 @@ function ProfileCard({ member }) {
     .join('')
     .slice(0, 2)
 
+  const photoSrc = member.photo_url
+    ? `${API_URL}/image-proxy?url=${encodeURIComponent(member.photo_url)}`
+    : null
+
   return (
     <div className="profile-card">
       <div className="profile-top">
-        {member.photo_url ? (
+        {photoSrc ? (
           <img
             className="profile-photo"
-            src={member.photo_url}
+            src={photoSrc}
             alt={member.name}
             loading="lazy"
           />

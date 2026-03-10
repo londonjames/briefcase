@@ -11,7 +11,7 @@ import requests as http_requests
 
 load_dotenv()
 
-from scraper import scrape_team
+from scraper import scrape_team, HEADERS
 from analyzer import generate_insights
 from notion_builder import create_dossier_page
 
@@ -198,6 +198,25 @@ def debug_fetch():
         })
     except Exception as e:
         return jsonify({"error": str(e)})
+
+
+@app.route("/api/image-proxy", methods=["GET"])
+def image_proxy():
+    """Proxy external images to avoid hotlink blocking."""
+    from flask import Response
+    url = request.args.get("url", "")
+    if not url:
+        return jsonify({"error": "URL required"}), 400
+    try:
+        resp = http_requests.get(url, headers=HEADERS, timeout=15)
+        resp.raise_for_status()
+        return Response(
+            resp.content,
+            content_type=resp.headers.get("Content-Type", "image/jpeg"),
+            headers={"Cache-Control": "public, max-age=86400"},
+        )
+    except Exception as e:
+        return jsonify({"error": str(e)}), 502
 
 
 @app.route("/api/health", methods=["GET"])
