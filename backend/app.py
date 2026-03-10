@@ -31,10 +31,11 @@ def redis_set(key, value):
     if not UPSTASH_URL or not UPSTASH_TOKEN:
         return False
     try:
+        redis_key = f"briefcase:{key}"
         resp = http_requests.post(
-            f"{UPSTASH_URL}/set/briefcase:{key}",
+            UPSTASH_URL,
             headers={"Authorization": f"Bearer {UPSTASH_TOKEN}"},
-            json=json.dumps(value),
+            json=["SET", redis_key, json.dumps(value)],
         )
         return resp.status_code == 200
     except Exception as e:
@@ -47,9 +48,11 @@ def redis_get(key):
     if not UPSTASH_URL or not UPSTASH_TOKEN:
         return None
     try:
-        resp = http_requests.get(
-            f"{UPSTASH_URL}/get/briefcase:{key}",
+        redis_key = f"briefcase:{key}"
+        resp = http_requests.post(
+            UPSTASH_URL,
             headers={"Authorization": f"Bearer {UPSTASH_TOKEN}"},
+            json=["GET", redis_key],
         )
         if resp.status_code == 200:
             data = resp.json()
