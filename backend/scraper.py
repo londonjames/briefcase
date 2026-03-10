@@ -52,6 +52,17 @@ def extract_team_structure(html, url):
     for tag in soup(["script", "style", "nav", "footer", "noscript", "svg", "iframe"]):
         tag.decompose()
 
+    # Convert lazy-loaded images to regular src for Claude to see
+    for img in soup.find_all("img"):
+        if not img.get("src") or img["src"].startswith("data:"):
+            for attr in ("data-image-path", "data-src", "data-lazy-src"):
+                if img.get(attr):
+                    img["src"] = img[attr]
+                    break
+    for source in soup.find_all("source"):
+        if source.get("data-srcset"):
+            source["srcset"] = source["data-srcset"]
+
     cleaned_html = str(soup)
     # Truncate if extremely large (Claude context limit)
     if len(cleaned_html) > 300_000:
