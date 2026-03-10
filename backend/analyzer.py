@@ -21,7 +21,7 @@ def generate_insights(team_data, progress_callback=None):
             if member.get("education"):
                 edu_strs = []
                 for edu in member["education"]:
-                    s = edu.get("school", "")
+                    s = edu.get("school") or ""
                     if edu.get("degree"):
                         s += f", {edu['degree']}"
                     if edu.get("honors"):
@@ -31,7 +31,7 @@ def generate_insights(team_data, progress_callback=None):
             if member.get("career"):
                 career_strs = []
                 for c in member["career"]:
-                    s = f"{c.get('role', '')} at {c.get('company', '')}"
+                    s = f"{c.get('role') or ''} at {c.get('company') or ''}"
                     if c.get("details"):
                         s += f" — {c['details']}"
                     career_strs.append(s)
