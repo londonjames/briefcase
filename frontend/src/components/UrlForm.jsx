@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 
 function UrlForm({ onSubmit, error }) {
   const [url, setUrl] = useState('')
@@ -34,6 +35,13 @@ function UrlForm({ onSubmit, error }) {
       </div>
       <p className="form-hint">
         Enter any team or leadership page URL
+      </p>
+      <p className="form-samples">
+        A few samples:{' '}
+        <Link to="/linkedin/10March2026">LinkedIn</Link>,{' '}
+        <Link to="/PLACEHOLDER_X">X</Link>,{' '}
+        <Link to="/PLACEHOLDER_Y">Y</Link>,{' '}
+        <Link to="/PLACEHOLDER_Z">Z</Link>
       </p>
       {error && <p className="form-error">{error}</p>}
     </form>

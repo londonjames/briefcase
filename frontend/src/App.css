@@ -118,6 +118,23 @@ body {
   color: var(--text-muted);
 }
 
+.form-samples {
+  text-align: center;
+  margin-top: 1.25rem;
+  font-size: 0.95rem;
+  color: var(--text-dim);
+}
+
+.form-samples a {
+  color: var(--text-muted);
+  text-decoration: underline;
+  transition: color 0.2s;
+}
+
+.form-samples a:hover {
+  color: var(--text);
+}
+
 .form-error {
   text-align: center;
   margin-top: 1rem;
