@@ -48,7 +48,9 @@ def generate_insights(team_data, progress_callback=None):
         team_data=team_text,
     )
 
-    message = client.messages.create(
+    # Stream the response so Railway doesn't kill the process during long generation
+    response_text = ""
+    with client.messages.stream(
         model="claude-sonnet-4-20250514",
         max_tokens=16384,
         messages=[
@@ -57,9 +59,9 @@ def generate_insights(team_data, progress_callback=None):
                 "content": prompt,
             }
         ],
-    )
-
-    response_text = message.content[0].text
+    ) as stream:
+        for text in stream.text_stream:
+            response_text += text
 
     # Extract JSON from response
     if "```json" in response_text:
