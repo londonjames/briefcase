@@ -39,7 +39,7 @@ function UrlForm({ onSubmit, error }) {
       <p className="form-samples">
         A few samples:{' '}
         <Link to="/linkedin/10March2026">LinkedIn</Link>,{' '}
-        <Link to="/PLACEHOLDER_X">X</Link>,{' '}
+        <Link to="/meta/10March2026">Meta</Link>,{' '}
         <Link to="/PLACEHOLDER_Y">Y</Link>,{' '}
         <Link to="/PLACEHOLDER_Z">Z</Link>
       </p>
