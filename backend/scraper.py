@@ -49,8 +49,31 @@ def extract_team_structure(html, url):
     """Use Claude to parse team page HTML and extract team member data."""
     # Trim HTML to reduce token usage — remove scripts, styles, nav, footer
     soup = BeautifulSoup(html, "html.parser")
+
+    # Extract background-image URLs from <style> tags before removing them
+    # Sites like Apple use CSS background-image instead of <img> tags
+    import re
+    bg_class_to_url = {}
+    for style_tag in soup.find_all("style"):
+        style_text = style_tag.string or ""
+        for match in re.finditer(
+            r'\.([\w-]+)\s*\{[^}]*background-image:\s*url\(([^)]+)\)', style_text
+        ):
+            cls, img_url = match.group(1), match.group(2).strip("'\"")
+            if not img_url.startswith("http"):
+                img_url = urljoin(url, img_url)
+            # Prefer 1x images (skip 2x retina duplicates)
+            if cls not in bg_class_to_url:
+                bg_class_to_url[cls] = img_url
+
     for tag in soup(["script", "style", "nav", "footer", "noscript", "svg", "iframe"]):
         tag.decompose()
+
+    # Inject background-image URLs as <img> tags so Claude can see them
+    for cls, img_url in bg_class_to_url.items():
+        for el in soup.find_all(class_=cls):
+            img_tag = soup.new_tag("img", src=img_url)
+            el.insert(0, img_tag)
 
     # Convert lazy-loaded images to regular src for Claude to see
     for img in soup.find_all("img"):
