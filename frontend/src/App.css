@@ -120,19 +120,22 @@ body {
 
 .form-samples {
   text-align: center;
-  margin-top: 1.25rem;
-  font-size: 0.95rem;
-  color: var(--text-dim);
+  margin-top: 1.5rem;
+  font-size: 0.8rem;
+  font-family: var(--mono);
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
 }
 
 .form-samples a {
-  color: var(--text-muted);
-  text-decoration: underline;
+  color: var(--accent);
+  text-decoration: none;
   transition: color 0.2s;
 }
 
 .form-samples a:hover {
   color: var(--text);
+  text-decoration: underline;
 }
 
 .form-error {
