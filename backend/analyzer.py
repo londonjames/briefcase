@@ -49,7 +49,7 @@ def generate_insights(team_data, progress_callback=None):
     )
 
     message = client.messages.create(
-        model="claude-opus-4-20250514",
+        model="claude-sonnet-4-20250514",
         max_tokens=16384,
         messages=[
             {
