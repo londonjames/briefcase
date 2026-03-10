@@ -71,6 +71,7 @@ def run_pipeline(job_id, url):
     def update_progress(pct, step):
         job["progress"] = pct
         job["step"] = step
+        print(f"[{job_id}] {pct}% - {step}", flush=True)
 
     try:
         job["status"] = "in_progress"
@@ -80,7 +81,9 @@ def run_pipeline(job_id, url):
         team_data = scrape_team(url, progress_callback=update_progress)
 
         # Step 5: Generate insights
+        print(f"[{job_id}] Starting insight generation...", flush=True)
         insights = generate_insights(team_data, progress_callback=update_progress)
+        print(f"[{job_id}] Insight generation complete.", flush=True)
 
         # Assemble final result
         result = {
@@ -98,18 +101,21 @@ def run_pipeline(job_id, url):
         slug = f"{company_slug}/{date_slug}"
         result["slug"] = slug
         # Persist to Redis (survives redeploys) and in-memory cache
-        redis_set(slug, result)
+        print(f"[{job_id}] Saving to Redis with slug: {slug}", flush=True)
+        redis_ok = redis_set(slug, result)
+        print(f"[{job_id}] Redis save: {'OK' if redis_ok else 'FAILED'}", flush=True)
 
         job["result"] = result
         job["status"] = "complete"
         job["progress"] = 100
         job["step"] = "Done"
+        print(f"[{job_id}] Pipeline complete!", flush=True)
 
     except Exception as e:
         job["status"] = "error"
         job["step"] = f"Error: {str(e)}"
         job["progress"] = 0
-        print(f"Pipeline error for job {job_id}: {e}")
+        print(f"[{job_id}] Pipeline error: {e}", flush=True)
         import traceback
         traceback.print_exc()
 
@@ -196,7 +202,7 @@ def debug_fetch():
 
 @app.route("/api/health", methods=["GET"])
 def health():
-    return jsonify({"status": "ok"})
+    return jsonify({"status": "ok", "pid": os.getpid(), "jobs": len(jobs)})
 
 
 if __name__ == "__main__":
