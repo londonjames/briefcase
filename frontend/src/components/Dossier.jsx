@@ -5,8 +5,12 @@ import InsightSection from './InsightSection'
 function Dossier({ data, onReset, onExportNotion }) {
   const [activeTab, setActiveTab] = useState('team')
 
-  // Flatten all members across groups, preserve original order
-  const allMembers = data.groups.flatMap((g) => g.members)
+  // Flatten all members across groups, sort alphabetically by last name
+  const allMembers = data.groups.flatMap((g) => g.members).sort((a, b) => {
+    const lastA = (a.name || '').trim().split(/\s+/).pop().toLowerCase()
+    const lastB = (b.name || '').trim().split(/\s+/).pop().toLowerCase()
+    return lastA.localeCompare(lastB)
+  })
 
   return (
     <div className="dossier">
