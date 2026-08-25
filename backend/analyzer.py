@@ -53,7 +53,7 @@ def generate_insights(team_data, progress_callback=None):
     # Stream the response so Railway doesn't kill the process during long generation
     response_text = ""
     with tracked("briefcase", "team-analysis") as _t, client.messages.stream(
-        model="claude-sonnet-4-20250514",
+        model="claude-sonnet-5",
         max_tokens=16384,
         messages=[
             {
