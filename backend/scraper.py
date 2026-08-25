@@ -5,6 +5,8 @@ from urllib.parse import urljoin, urlparse
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import json
 import anthropic
+
+from usage_logger import tracked
 from prompts import TEAM_EXTRACTION_PROMPT, PROFILE_EXTRACTION_PROMPT
 
 client = anthropic.Anthropic()
@@ -91,16 +93,18 @@ def extract_team_structure(html, url):
     if len(cleaned_html) > 300_000:
         cleaned_html = cleaned_html[:300_000]
 
-    message = client.messages.create(
-        model="claude-sonnet-4-20250514",
-        max_tokens=8192,
-        messages=[
-            {
-                "role": "user",
-                "content": f"The page URL is: {url}\n\nHTML content:\n\n{cleaned_html}\n\n{TEAM_EXTRACTION_PROMPT}",
-            }
-        ],
-    )
+    with tracked("briefcase", "team-extract") as _t:
+        message = client.messages.create(
+            model="claude-sonnet-4-20250514",
+            max_tokens=8192,
+            messages=[
+                {
+                    "role": "user",
+                    "content": f"The page URL is: {url}\n\nHTML content:\n\n{cleaned_html}\n\n{TEAM_EXTRACTION_PROMPT}",
+                }
+            ],
+        )
+        _t.log(message)
 
     response_text = message.content[0].text
     # Extract JSON from response (handle markdown code blocks)
@@ -143,16 +147,18 @@ def fetch_profile(member, progress_callback=None):
             name=member["name"], title=member.get("title", "Unknown")
         )
 
-        message = client.messages.create(
-            model="claude-haiku-4-5-20251001",
-            max_tokens=4096,
-            messages=[
-                {
-                    "role": "user",
-                    "content": f"Profile page URL: {profile_url}\n\nHTML:\n\n{cleaned_html}\n\n{prompt}",
-                }
-            ],
-        )
+        with tracked("briefcase", "profile-extract") as _t:
+            message = client.messages.create(
+                model="claude-haiku-4-5-20251001",
+                max_tokens=4096,
+                messages=[
+                    {
+                        "role": "user",
+                        "content": f"Profile page URL: {profile_url}\n\nHTML:\n\n{cleaned_html}\n\n{prompt}",
+                    }
+                ],
+            )
+            _t.log(message)
 
         response_text = message.content[0].text
         if "```json" in response_text:

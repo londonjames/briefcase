@@ -1,5 +1,7 @@
 import json
 import anthropic
+
+from usage_logger import tracked
 from prompts import ANALYSIS_PROMPT
 
 client = anthropic.Anthropic()
@@ -50,7 +52,7 @@ def generate_insights(team_data, progress_callback=None):
 
     # Stream the response so Railway doesn't kill the process during long generation
     response_text = ""
-    with client.messages.stream(
+    with tracked("briefcase", "team-analysis") as _t, client.messages.stream(
         model="claude-sonnet-4-20250514",
         max_tokens=16384,
         messages=[
@@ -62,6 +64,7 @@ def generate_insights(team_data, progress_callback=None):
     ) as stream:
         for text in stream.text_stream:
             response_text += text
+        _t.log(stream.get_final_message())
 
     # Extract JSON from response
     if "```json" in response_text:
