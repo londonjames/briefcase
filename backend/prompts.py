@@ -5,6 +5,10 @@ For each person return:
 - title: Job title/role
 - photo_url: URL of their photo/headshot (absolute URL preferred, or relative path)
 - profile_url: URL to their individual profile page (absolute URL preferred, or relative path)
+- bio: If the page shows biography text for this person (inline, in an accordion, or in a
+  modal), return it in full, verbatim. Many leadership pages carry the whole bio here and
+  have no separate profile page — that text is the only evidence the dossier will ever get,
+  so do not summarise it and do not skip it. Use null only when the page truly has none.
 
 Identify any team groupings visible in the HTML (sections, tabs, categories, departments).
 If there are no clear groupings, put everyone in a single group called "Team".
@@ -20,7 +24,8 @@ Return ONLY valid JSON in this exact format:
           "name": "Person Name",
           "title": "Their Title",
           "photo_url": "https://...",
-          "profile_url": "https://..."
+          "profile_url": "https://...",
+          "bio": "Full biography text if the page shows one, else null"
         }
       ]
     }
@@ -29,6 +34,7 @@ Return ONLY valid JSON in this exact format:
 
 Important:
 - Extract ALL team members, not just a sample
+- Never write a bio from your own knowledge of the person. Copy what the page says or return null
 - If photo or profile URLs are relative, keep them as-is (the caller will resolve them)
 - If no photo or profile URL exists, use null
 - Infer the company name from the page content, meta tags, or title"""
@@ -66,9 +72,35 @@ Important:
 
 ANALYSIS_PROMPT = """You are an intelligence analyst producing a classified-feel team dossier on {team_count} people at {company}. Your job is to find what others miss — hidden patterns, power dynamics, cultural tells, and standout individuals. Be EXTREMELY specific: reference people BY NAME, give exact counts and percentages, and surface non-obvious connections.
 
-Here is the structured data for every team member:
+Here is the structured data for every team member. It is scraped from the company's own pages and is the ONLY evidence you have:
 
 {team_data}
+
+## Ground rules — these override every instruction below
+
+1. **Every claim must trace to a line in the data above.** If you cannot point to the words
+   that support a sentence, do not write the sentence.
+2. **You may recognise some of these people. Ignore what you know.** Anything you recall
+   about where someone worked, studied, or what they founded is not evidence — this dossier
+   is about what their employer publishes, and your memory is frequently wrong about which
+   person of that name did what. A title is not a career history: "Chief Business Officer"
+   tells you nothing about whether they were ever at Bain.
+3. **Never name a company, school, degree, fund, or achievement that does not appear in the
+   data.** This is the single most damaging failure mode: a fabricated alma mater or a
+   made-up employer reads exactly as confidently as a real one, and the reader has no way to
+   tell them apart.
+4. **Counts and percentages must be countable from the data.** If two bios mention Stanford,
+   the count is two — not an estimate of how many probably went there.
+5. **Say when you don't know.** A section with thin evidence gets a short, direct statement
+   of what the source pages don't reveal. One honest line beats five invented ones, and the
+   reader can then go find the missing material. Never use "Confirmed:" or similar
+   certainty language on anything you inferred.
+6. **Absence of evidence is not evidence of absence.** If no bio mentions an MBA, that means
+   the pages don't say — not that the team has a low MBA rate. Do not build a finding out of
+   what is missing from the scrape.
+
+Analysis, inference and a strong point of view are still wanted — draw connections between
+what the bios actually say. The rules above constrain your facts, not your judgment.
 
 Produce analysis in the following 6 sections. Each section should be a JSON object with "title" and "content" (markdown string). The first 4 sections should read like intelligence analysis — opinionated, sharp, surprising. The last 2 are structured reference sections.
 
@@ -109,7 +141,10 @@ Sections to produce:
    - Be opinionated. This section should have a strong point of view.
 
 5. **Career Trajectories**
-   Structured breakdown of how these people got here:
+   Structured breakdown of how these people got here, built ONLY from schools and employers
+   named in the bios above. Every pipeline below is a filter over that data, not a prompt to
+   recall who these people are — if no bio names a consultancy, the consulting pipeline
+   section says the pages don't disclose prior employers, and that is the whole answer:
    - Education: MBA programs school-by-school with names (e.g., "Harvard Business School (8): Kent Bennett, Sarah Smith..."). What percentage have MBAs? Undergraduate institutions with names. Advanced degrees (PhDs, JDs, MDs) with names.
    - Consulting pipeline: McKinsey, BCG, Bain alumni with names and counts
    - Banking pipeline: Goldman, Morgan Stanley, etc. with names and counts
@@ -118,7 +153,8 @@ Sections to produce:
    - Most unusual career pivots with brief descriptions
 
 6. **Team Composition Dashboard**
-   Factual reference section with hard numbers:
+   Factual reference section with hard numbers, every one of them countable from the data.
+   Omit any line the data cannot support rather than estimating it:
    - Gender breakdown: exact counts and percentages, broken down by seniority level
    - Geographic patterns if detectable (office locations, regional backgrounds)
    - Industry specialization clusters with names

@@ -44,6 +44,27 @@ def generate_insights(team_data, progress_callback=None):
 
     team_text = "\n\n".join(team_text_parts)
 
+    # State the coverage explicitly. Left to infer it, the model reads thin data as an
+    # invitation to fill the gaps from memory — which is how a roster of names and titles
+    # became a dossier full of employers nobody on it ever worked for.
+    members = [m for g in team_data.get("groups", []) for m in g.get("members", [])]
+    total = len(members) or 1
+    coverage = (
+        f"EVIDENCE COVERAGE — of {len(members)} people: "
+        f"{sum(1 for m in members if m.get('bio'))} have a bio, "
+        f"{sum(1 for m in members if m.get('career'))} have prior employers listed, "
+        f"{sum(1 for m in members if m.get('education'))} have education listed. "
+        "Anything not listed above is absent from the source pages, not absent from their "
+        "careers — treat it as unknown and say so."
+    )
+    if sum(1 for m in members if m.get("bio")) / total < 0.25:
+        coverage += (
+            " This is a names-and-titles roster with almost no biographical evidence. "
+            "Sections that depend on career history should say plainly that the source "
+            "page does not carry it, rather than reaching for detail that isn't there."
+        )
+    team_text = f"{coverage}\n\n{team_text}"
+
     prompt = ANALYSIS_PROMPT.format(
         team_count=team_data["team_count"],
         company=team_data["company"],

@@ -190,18 +190,28 @@ def extract_team_structure(html, url):
 
 
 def fetch_profile(member, progress_callback=None):
-    """Fetch and parse an individual profile page."""
+    """Structure one person's background.
+
+    Prefers their own profile page. Where a team page carries the whole bio inline and
+    links nowhere — common on leadership pages — that text is structured instead, because
+    it is the only evidence the dossier will get about this person.
+    """
     profile_url = member.get("profile_url")
-    if not profile_url:
+    inline_bio = member.get("bio")
+
+    if not profile_url and not inline_bio:
         return {**member, "bio": None, "education": [], "career": [], "personal": []}
 
     try:
-        html = fetch_page(profile_url)
-        soup = BeautifulSoup(html, "html.parser")
-        for tag in soup(["script", "style", "nav", "footer", "noscript", "svg", "iframe"]):
-            tag.decompose()
+        if profile_url:
+            html = fetch_page(profile_url)
+            soup = BeautifulSoup(html, "html.parser")
+            for tag in soup(["script", "style", "nav", "footer", "noscript", "svg", "iframe"]):
+                tag.decompose()
+            cleaned_html = str(soup)
+        else:
+            cleaned_html = inline_bio
 
-        cleaned_html = str(soup)
         if len(cleaned_html) > 100_000:
             cleaned_html = cleaned_html[:100_000]
 
@@ -217,18 +227,26 @@ def fetch_profile(member, progress_callback=None):
                 messages=[
                     {
                         "role": "user",
-                        "content": f"Profile page URL: {profile_url}\n\nHTML:\n\n{cleaned_html}\n\n{prompt}",
+                        "content": (
+                            f"Profile page URL: {profile_url}\n\nHTML:\n\n{cleaned_html}"
+                            if profile_url
+                            else f"Biography text from {member['name']}'s team page:\n\n{cleaned_html}"
+                        )
+                        + f"\n\n{prompt}",
                     }
                 ],
             )
             _t.log(message)
 
         profile_data = parse_json(message)
-        return {**member, **profile_data}
+        merged = {**member, **profile_data}
+        if not merged.get("bio"):
+            merged["bio"] = inline_bio
+        return merged
 
     except Exception as e:
         print(f"Error fetching profile for {member['name']}: {e}")
-        return {**member, "bio": None, "education": [], "career": [], "personal": []}
+        return {**member, "bio": inline_bio, "education": [], "career": [], "personal": []}
 
 
 def scrape_team(url, progress_callback=None):

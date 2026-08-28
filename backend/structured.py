@@ -48,8 +48,11 @@ def _member():
             "title": {"type": ["string", "null"]},
             "photo_url": {"type": ["string", "null"]},
             "profile_url": {"type": ["string", "null"]},
+            # Leadership pages often carry the whole bio inline and link nowhere.
+            # Without this the text is dropped and the analysis has nothing to stand on.
+            "bio": {"type": ["string", "null"]},
         },
-        "required": ["name", "title", "photo_url", "profile_url"],
+        "required": ["name", "title", "photo_url", "profile_url", "bio"],
         "additionalProperties": False,
     }
 
