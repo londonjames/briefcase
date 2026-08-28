@@ -23,7 +23,7 @@ import requests
 PRICES = {
     "claude-fable-5": (10, 50),
     "claude-opus-5": (5, 25),
-    "claude-sonnet-5": (3, 15),
+    "claude-sonnet-5": (2, 10),
     "claude-opus-4-8": (5, 25),
     "claude-opus-4-7": (5, 25),
     "claude-opus-4-6": (5, 25),

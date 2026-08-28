@@ -12,7 +12,18 @@ client = anthropic.Anthropic()
 
 
 def _normalise(text):
-    """Compare quotes to source without tripping over smart quotes or wrapping."""
+    """Compare quotes to source without tripping over smart quotes or wrapping.
+
+    Quotes sometimes come back with the escape sequence rather than the
+    character — a literal backslash-u-2019 where the source has an apostrophe.
+    Left undecoded that fails the match and reports a true claim as fabricated,
+    which is the one kind of error that makes the warning worth ignoring.
+    """
+    if "\\u" in text:
+        try:
+            text = text.encode("latin-1", "backslashreplace").decode("unicode_escape")
+        except (UnicodeDecodeError, UnicodeEncodeError):
+            pass
     for a, b in (("\u2019", "'"), ("\u2018", "'"), ("\u201c", '"'), ("\u201d", '"'), ("\u2014", "-"), ("\u2013", "-")):
         text = text.replace(a, b)
     return re.sub(r"\s+", " ", text).strip().lower()
