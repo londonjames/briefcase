@@ -6,6 +6,7 @@ and json.loads() kills the whole job. `output_config.format` constrains
 generation instead, so the response is valid JSON matching the schema.
 """
 import json
+import re
 
 
 def json_format(schema):
@@ -25,6 +26,27 @@ def response_text(message):
     raise ValueError("Claude returned no text block")
 
 
+_ESCAPE = re.compile(r"\\u([0-9a-fA-F]{4})")
+
+
+def clean_text(value):
+    """Turn stray escape sequences back into the characters they stand for.
+
+    Current models sometimes emit a doubled escape inside a JSON string, so
+    json.loads returns the six literal characters backslash-u-2-0-1-3 where the
+    text should have an en dash. It reaches the page verbatim and looks like a
+    corrupted export, which on a document sent to the company it describes is
+    worse than a missing dash.
+    """
+    if isinstance(value, str):
+        return _ESCAPE.sub(lambda m: chr(int(m.group(1), 16)), value)
+    if isinstance(value, list):
+        return [clean_text(v) for v in value]
+    if isinstance(value, dict):
+        return {k: clean_text(v) for k, v in value.items()}
+    return value
+
+
 def parse_json(message):
     """Parse the JSON body of a schema-constrained response.
 
@@ -37,7 +59,7 @@ def parse_json(message):
             "Claude hit max_tokens and the JSON was cut off. Raise max_tokens "
             "for this call, or feed it less input."
         )
-    return json.loads(response_text(message))
+    return clean_text(json.loads(response_text(message)))
 
 
 def _member():
