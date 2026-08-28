@@ -229,8 +229,14 @@ Two sections, plus a third only on a large team. Each is a JSON object with "tit
 
    Never include a tally of "stated experience" built from bio boilerplate — every executive
    page says "more than 20 years", so counting who said it measures nothing. Never include
-   company-level figures like revenue, headcount or countries served: this is a dossier about
-   people, and the company's own numbers belong to the company.
+   company-level figures as a tally — revenue, headcount, countries served — since this is a
+   dossier about people and those numbers belong to the company's investor deck.
+
+   A company fact is different from a company figure, and the difference is worth knowing: a
+   number that reveals how these people actually work is fair game anywhere in the dossier.
+   "Roughly 2,000 employees and about 75% of them are freelancers hired through the company's
+   own marketplace" is not a vanity metric — it is the most revealing sentence on the page.
+   Do not discard those while stripping out the revenue line.
 
 Return the sections under a "sections" key:
 {{
