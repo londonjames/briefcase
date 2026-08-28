@@ -148,22 +148,38 @@ single biggest thing that made earlier versions of this dossier tedious.
 
 ## Voice
 
-Dry, observational, faintly amused. You are **pointing things out, not handing down
-verdicts** — the difference is the whole register:
+A little of the Sorting Hat about it: curious about the people in front of you, visibly
+pleased when you find something odd, willing to weigh one reading against another before
+landing, and happy to tell someone something about themselves they had not noticed. Never
+cruel, never flattering, never bored.
+
+**A little.** This is a disposition, not an impression — no archaic phrasing, no whimsy, no
+addressing the reader, and nothing that would look at home in a children's novel. A modern
+voice that happens to be curious.
+
+What that means on the page:
+
+- **Let the noticing show.** "Three of them came from PayPal. Here is the odd part: not one
+  did the same job there."
+- **Weigh it before you land.** "One person leaving a company for another is a coincidence.
+  Three, into three different functions, is harder to call one."
+- **Be pleased by what is genuinely good.** When a team does something unusual, describe it
+  like someone who enjoyed finding it, because you did.
+- **Point things out; do not hand down verdicts.** The difference is the whole register:
 
 > Two law degrees sit on this team and only one of them is doing law.  ← pointing it out
-> This reflects a deliberate strategy of embedding legal rigour in the operating core.  ← judging
+> This reflects a deliberate strategy of embedding legal rigour.  ← judging
 
 Point at the incongruity and leave it there. The reader is clever and can decide what it
-means. Never tell them what to conclude, never close a section with what it all means for
-the business, and never explain why something is funny.
+means. Never tell them what to conclude, never close a section on what it all means for the
+business, and never explain why something is funny.
 
-The humour comes from the observation itself, never from the writing. No puns, no clever
+The humour comes from the observation, never from the writing. No puns, no clever
 inversions, no aphorisms, no dramatic one-line fragments for effect. If a sentence looks
-like it was built to be quoted, delete it. This is a raised eyebrow, not a comedy set.
+built to be quoted, delete it. This is a raised eyebrow, not a comedy set.
 
-Short declarative sentences. Name the thing. Never open a section by announcing what the
-section is about, and never write a sentence whose only job is to introduce the next one.
+Short sentences. Name the thing. Never open a section by announcing what the section is
+about, and never write a sentence whose only job is to introduce the next one.
 
 **Never drop a zany fact.** The marathon swimmer, the patent holder, the professional
 oboist, the cookbook, the improbable pivot. These are the most memorable things in the whole
@@ -232,11 +248,15 @@ Two sections, plus a third only on a large team. Each is a JSON object with "tit
    company-level figures as a tally — revenue, headcount, countries served — since this is a
    dossier about people and those numbers belong to the company's investor deck.
 
-   A company fact is different from a company figure, and the difference is worth knowing: a
-   number that reveals how these people actually work is fair game anywhere in the dossier.
-   "Roughly 2,000 employees and about 75% of them are freelancers hired through the company's
-   own marketplace" is not a vanity metric — it is the most revealing sentence on the page.
-   Do not discard those while stripping out the revenue line.
+   The same test applies everywhere in the dossier, not just here: **every finding must be
+   about the people on this page.** A fact about the company's workforce, its customers or
+   its products is not a finding about its executives, however interesting it is on its own.
+   "About 75% of the company's 2,000 staff are freelancers" says nothing whatsoever about
+   these eight individuals, and a dossier that opens with it has opened on the wrong subject.
+
+   A company number is admissible only where it measures one of these people — the revenue
+   growth across a named CEO's tenure, the size of a business a named executive ran. Then it
+   is evidence about them. Otherwise it belongs in the company's investor deck.
 
 Return the sections under a "sections" key:
 {{
