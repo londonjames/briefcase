@@ -48,10 +48,41 @@ def _fetch_cloudscraper(url):
     return resp.status_code, resp.text
 
 
+def _fetch_via_claude(url):
+    """Last resort: have Anthropic's servers fetch it.
+
+    Bot-protection that blocks on IP reputation rejects any datacenter client,
+    however good its TLS fingerprint. The server-side web_fetch tool comes from
+    a different network entirely, and returns the page as markdown — which the
+    extraction step reads just as happily as HTML.
+    """
+    with tracked("briefcase", "fetch-web") as _t:
+        message = client.messages.create(
+            model="claude-haiku-4-5",
+            max_tokens=1024,
+            tools=[{"type": "web_fetch_20250910", "name": "web_fetch", "max_uses": 1}],
+            tool_choice={"type": "tool", "name": "web_fetch"},
+            messages=[{"role": "user", "content": f"Fetch {url}"}],
+        )
+        _t.log(message)
+
+    for block in message.content:
+        if getattr(block, "type", None) != "web_fetch_tool_result":
+            continue
+        result = block.content
+        source = getattr(getattr(result, "content", None), "source", None)
+        if source and getattr(source, "data", None):
+            return 200, source.data
+        raise RuntimeError(getattr(result, "error_code", None) or "no document returned")
+
+    raise RuntimeError("web_fetch was not called")
+
+
 FETCHERS = [
     ("requests", _fetch_requests),
     ("impersonated", _fetch_impersonated),
     ("cloudscraper", _fetch_cloudscraper),
+    ("claude", _fetch_via_claude),
 ]
 
 
@@ -60,7 +91,8 @@ def fetch_page(url, retries=2):
 
     Plain requests handles most sites. Bot-protected ones reject it on the TLS
     handshake before a single header is read, so we escalate to a Chrome-
-    impersonating client and then cloudscraper before giving up.
+    impersonating client, then cloudscraper, and finally to a server-side fetch
+    from Anthropic's network for sites that block our IP outright.
     """
     failures = []
     for name, fetch in FETCHERS:
