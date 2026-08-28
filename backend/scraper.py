@@ -3,11 +3,11 @@ import cloudscraper
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urlparse
 from concurrent.futures import ThreadPoolExecutor, as_completed
-import json
 import anthropic
 
 from usage_logger import tracked
 from prompts import TEAM_EXTRACTION_PROMPT, PROFILE_EXTRACTION_PROMPT
+from structured import PROFILE_SCHEMA, TEAM_SCHEMA, json_format, parse_json
 
 client = anthropic.Anthropic()
 
@@ -97,6 +97,7 @@ def extract_team_structure(html, url):
         message = client.messages.create(
             model="claude-sonnet-5",
             max_tokens=8192,
+            output_config=json_format(TEAM_SCHEMA),
             messages=[
                 {
                     "role": "user",
@@ -106,14 +107,7 @@ def extract_team_structure(html, url):
         )
         _t.log(message)
 
-    response_text = message.content[0].text
-    # Extract JSON from response (handle markdown code blocks)
-    if "```json" in response_text:
-        response_text = response_text.split("```json")[1].split("```")[0]
-    elif "```" in response_text:
-        response_text = response_text.split("```")[1].split("```")[0]
-
-    team_data = json.loads(response_text.strip())
+    team_data = parse_json(message)
 
     # Resolve relative URLs
     base_url = f"{urlparse(url).scheme}://{urlparse(url).netloc}"
@@ -151,6 +145,7 @@ def fetch_profile(member, progress_callback=None):
             message = client.messages.create(
                 model="claude-haiku-4-5-20251001",
                 max_tokens=4096,
+                output_config=json_format(PROFILE_SCHEMA),
                 messages=[
                     {
                         "role": "user",
@@ -160,13 +155,7 @@ def fetch_profile(member, progress_callback=None):
             )
             _t.log(message)
 
-        response_text = message.content[0].text
-        if "```json" in response_text:
-            response_text = response_text.split("```json")[1].split("```")[0]
-        elif "```" in response_text:
-            response_text = response_text.split("```")[1].split("```")[0]
-
-        profile_data = json.loads(response_text.strip())
+        profile_data = parse_json(message)
         return {**member, **profile_data}
 
     except Exception as e:

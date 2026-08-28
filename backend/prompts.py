@@ -128,12 +128,14 @@ Sections to produce:
 For smaller teams (<20 people), be deeply personal and mention almost everyone by name.
 For larger teams (50+), lead with statistical patterns but still name standouts.
 
-Return ONLY valid JSON as an array of objects:
-[
-  {{
-    "title": "Section Title",
-    "content": "## Heading\\n\\nMarkdown content with **bold names**, bullet points, exact numbers..."
-  }}
-]
+Return the six sections under a "sections" key:
+{{
+  "sections": [
+    {{
+      "title": "Section Title",
+      "content": "## Heading\\n\\nMarkdown content with **bold names**, bullet points, exact numbers..."
+    }}
+  ]
+}}
 
 This should read like a compelling, opinionated intelligence report — not a formulaic HR summary. Surprise the reader. Make them feel like they have an unfair advantage after reading this."""
