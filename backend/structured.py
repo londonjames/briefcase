@@ -137,3 +137,27 @@ ANALYSIS_SCHEMA = {
     "required": ["sections"],
     "additionalProperties": False,
 }
+
+
+# The grounding audit: every claim, plus the words from the source that back it.
+# A null quote is an unsupported claim; a quote that isn't in the source is too.
+GROUNDING_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "claims": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "person": {"type": "string"},
+                    "claim": {"type": "string"},
+                    "quote": {"type": ["string", "null"]},
+                },
+                "required": ["person", "claim", "quote"],
+                "additionalProperties": False,
+            },
+        }
+    },
+    "required": ["claims"],
+    "additionalProperties": False,
+}

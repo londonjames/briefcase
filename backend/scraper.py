@@ -1,3 +1,4 @@
+import re
 import time
 
 import requests
@@ -249,6 +250,79 @@ def fetch_profile(member, progress_callback=None):
         return {**member, "bio": inline_bio, "education": [], "career": [], "personal": []}
 
 
+def _person_key(name):
+    """Match people across sections despite spacing and punctuation."""
+    return re.sub(r"[^a-z]", "", (name or "").lower())
+
+
+def _merge_person(first, second):
+    """Fold a second appearance of the same person into the first.
+
+    Leadership pages routinely list a founder-CEO under both the executive team
+    and the board. Two cards for one person is wrong on the page and worse in
+    the analysis, where it inflates every count they appear in.
+    """
+    titles = [t for t in (first.get("title"), second.get("title")) if t]
+    merged = {**second, **first}
+    merged["title"] = " · ".join(dict.fromkeys(titles)) or None
+
+    # The two entries are usually different prose about the same career, so keep
+    # both — the second often names the prior employers the first leaves out.
+    bios = [b.strip() for b in (first.get("bio"), second.get("bio")) if b and b.strip()]
+    merged["bio"] = "\n\n".join(dict.fromkeys(bios)) or None
+
+    for field, key in (
+        ("education", lambda e: (e.get("school"), e.get("degree"))),
+        ("career", lambda c: (c.get("company"), c.get("role"))),
+    ):
+        seen, out = set(), []
+        for item in (first.get(field) or []) + (second.get(field) or []):
+            k = key(item)
+            if k not in seen:
+                seen.add(k)
+                out.append(item)
+        merged[field] = out
+
+    merged["personal"] = list(
+        dict.fromkeys((first.get("personal") or []) + (second.get("personal") or []))
+    )
+    return merged
+
+
+def dedupe_across_groups(groups):
+    """One card per person, keeping them in the group they first appear in.
+
+    Returns the groups and the roles each duplicated person held, so the
+    analysis can talk about someone sitting on both sides of the table instead
+    of counting them twice.
+    """
+    canonical = {}
+    order = []
+    memberships = {}
+
+    for group in groups:
+        for member in group.get("members", []):
+            key = _person_key(member.get("name"))
+            memberships.setdefault(key, []).append(group["name"])
+            if key in canonical:
+                gname, existing = canonical[key]
+                canonical[key] = (gname, _merge_person(existing, member))
+            else:
+                canonical[key] = (group["name"], member)
+                order.append((group["name"], key))
+
+    for key, (_, member) in canonical.items():
+        groups_in = list(dict.fromkeys(memberships[key]))
+        if len(groups_in) > 1:
+            member["also_in"] = groups_in
+
+    deduped = []
+    for group in groups:
+        members = [canonical[k][1] for gname, k in order if gname == group["name"]]
+        deduped.append({"name": group["name"], "members": members})
+    return [g for g in deduped if g["members"]]
+
+
 def scrape_team(url, progress_callback=None):
     """Full scraping pipeline: fetch page → extract team → fetch profiles."""
     if progress_callback:
@@ -299,17 +373,16 @@ def scrape_team(url, progress_callback=None):
         enriched_groups[group_name].sort(key=lambda x: x[0])
         enriched_groups[group_name] = [m for _, m in enriched_groups[group_name]]
 
-    # Reconstruct groups with enriched data
-    result_groups = []
-    for group in groups:
-        result_groups.append({
-            "name": group["name"],
-            "count": len(enriched_groups[group["name"]]),
-            "members": enriched_groups[group["name"]],
-        })
+    # Reconstruct groups with enriched data, then collapse anyone listed twice.
+    result_groups = dedupe_across_groups([
+        {"name": group["name"], "members": enriched_groups[group["name"]]}
+        for group in groups
+    ])
+    for group in result_groups:
+        group["count"] = len(group["members"])
 
     return {
         "company": company,
-        "team_count": total_members,
+        "team_count": sum(g["count"] for g in result_groups),
         "groups": result_groups,
     }

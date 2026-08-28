@@ -65,6 +65,18 @@ function Dossier({ data, onReset, onExportNotion, tab, onTabChange }) {
 
       {activeTab === 'insights' && (
         <div className="tab-content">
+          {data.unsupported_claims?.length > 0 && (
+            <div className="grounding-warning">
+              <strong>{data.unsupported_claims.length} claim
+              {data.unsupported_claims.length === 1 ? '' : 's'} could not be traced to the
+              source pages</strong> and may be wrong:
+              <ul>
+                {data.unsupported_claims.map((c, i) => (
+                  <li key={i}>{c.person} — {c.claim}</li>
+                ))}
+              </ul>
+            </div>
+          )}
           {data.insights && data.insights.length > 0 ? (
             data.insights.map((insight, i) => (
               <InsightSection

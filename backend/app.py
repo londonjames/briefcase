@@ -82,7 +82,7 @@ def run_pipeline(job_id, url):
 
         # Step 5: Generate insights
         print(f"[{job_id}] Starting insight generation...", flush=True)
-        insights = generate_insights(team_data, progress_callback=update_progress)
+        insights, unsupported = generate_insights(team_data, progress_callback=update_progress)
         print(f"[{job_id}] Insight generation complete.", flush=True)
 
         # Assemble final result
@@ -93,6 +93,10 @@ def run_pipeline(job_id, url):
             "groups": team_data["groups"],
             "insights": insights,
             "source_url": url,
+            # Claims the audit could not trace to the source pages. Empty is the
+            # normal case; anything here is shown on the dossier rather than
+            # quietly shipped as fact.
+            "unsupported_claims": unsupported,
         }
 
         # Generate slug: lowercase company name + date

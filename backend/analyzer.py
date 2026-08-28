@@ -1,10 +1,55 @@
+import json
+import re
+
 import anthropic
 
 from usage_logger import tracked
-from prompts import ANALYSIS_PROMPT
-from structured import ANALYSIS_SCHEMA, json_format, parse_json
+from prompts import ANALYSIS_PROMPT, GROUNDING_CHECK_PROMPT
+from structured import ANALYSIS_SCHEMA, GROUNDING_SCHEMA, json_format, parse_json
 
 client = anthropic.Anthropic()
+
+
+def _normalise(text):
+    """Compare quotes to source without tripping over smart quotes or wrapping."""
+    for a, b in (("\u2019", "'"), ("\u2018", "'"), ("\u201c", '"'), ("\u201d", '"'), ("\u2014", "-"), ("\u2013", "-")):
+        text = text.replace(a, b)
+    return re.sub(r"\s+", " ", text).strip().lower()
+
+
+def check_grounding(insights, source_text):
+    """Find claims in the analysis that the source pages don't support.
+
+    The model proposes a supporting quote for each claim; this function decides
+    whether the quote is real by matching it against the source. That split
+    matters — an auditor that is only asked "is this supported?" will happily
+    say yes about something it invented, but it cannot fake a string match.
+    """
+    analysis_text = "\n\n".join(f"## {s['title']}\n{s['content']}" for s in insights)
+
+    with tracked("briefcase", "grounding-check") as _t, client.messages.stream(
+        model="claude-sonnet-5",
+        max_tokens=32000,
+        output_config=json_format(GROUNDING_SCHEMA),
+        messages=[
+            {
+                "role": "user",
+                "content": GROUNDING_CHECK_PROMPT.format(
+                    source=source_text, analysis=analysis_text
+                ),
+            }
+        ],
+    ) as stream:
+        message = stream.get_final_message()
+        _t.log(message)
+
+    source_norm = _normalise(source_text)
+    unsupported = []
+    for claim in parse_json(message)["claims"]:
+        quote = claim.get("quote")
+        if not quote or _normalise(quote) not in source_norm:
+            unsupported.append(claim)
+    return unsupported
 
 
 def generate_insights(team_data, progress_callback=None):
@@ -89,6 +134,46 @@ def generate_insights(team_data, progress_callback=None):
     insights = parse_json(message)["sections"]
 
     if progress_callback:
+        progress_callback(88, "Checking every claim against the source pages...")
+
+    unsupported = check_grounding(insights, team_text)
+    if unsupported:
+        print(f"Grounding: {len(unsupported)} unsupported claims, rewriting", flush=True)
+        if progress_callback:
+            progress_callback(92, f"Removing {len(unsupported)} unsupported claims...")
+
+        listed = "\n".join(
+            f"- {c['person']}: {c['claim']}" for c in unsupported
+        )
+        with tracked("briefcase", "team-analysis-repair") as _t, client.messages.stream(
+            model="claude-sonnet-5",
+            max_tokens=64000,
+            output_config=json_format(ANALYSIS_SCHEMA),
+            messages=[
+                {"role": "user", "content": prompt},
+                {"role": "assistant", "content": json.dumps({"sections": insights})},
+                {
+                    "role": "user",
+                    "content": (
+                        "An audit found these claims nowhere in the team data:\n\n"
+                        f"{listed}\n\n"
+                        "Each one was invented. Return the six sections again with every "
+                        "one of them removed — delete the sentence, or rewrite it to say "
+                        "only what the data supports. Do not replace them with different "
+                        "unsupported claims, and do not weaken the rest of the analysis "
+                        "while you are in there."
+                    ),
+                },
+            ],
+        ) as stream:
+            repaired = stream.get_final_message()
+            _t.log(repaired)
+        insights = parse_json(repaired)["sections"]
+        unsupported = check_grounding(insights, team_text)
+        if unsupported:
+            print(f"Grounding: {len(unsupported)} claims still unsupported", flush=True)
+
+    if progress_callback:
         progress_callback(95, "Finalizing dossier...")
 
-    return insights
+    return insights, unsupported

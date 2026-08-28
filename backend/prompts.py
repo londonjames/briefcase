@@ -66,11 +66,20 @@ Return ONLY valid JSON in this exact format:
 Important:
 - Extract the full bio text, not a summary
 - List education in chronological order if possible
-- List career history (prior to current role) in reverse chronological order
-- Personal details include hobbies, interests, side projects, quirks mentioned in the bio
+- career: EVERY organisation the text names this person as having worked for, including the
+  current one. Prior employers are often a single clause buried inside a paragraph about
+  their current job ("She started her career in the strategy group at McKinsey & Company") —
+  read the whole bio for them rather than only the sentences that announce a job change. A
+  bio that names past employers must never come back with an empty career list.
+- List career history in reverse chronological order where the text makes the order clear
+- personal: anything about them as a human rather than an employee — hobbies, sports,
+  bands, books written, patents, volunteering, unusual hometowns, languages, side projects,
+  quirks, awards outside their job. Capture ALL of them, in the bio's own words where you
+  can. These details are the most memorable part of the finished dossier and nothing
+  downstream can recover one you leave out.
 - If a section has no data, use an empty array []"""
 
-ANALYSIS_PROMPT = """You are an intelligence analyst producing a classified-feel team dossier on {team_count} people at {company}. Your job is to find what others miss — hidden patterns, power dynamics, cultural tells, and standout individuals. Be EXTREMELY specific: reference people BY NAME, give exact counts and percentages, and surface non-obvious connections.
+ANALYSIS_PROMPT = """You are an intelligence analyst producing a team dossier on {team_count} people at {company}. Your job is to find what others miss — the connections between these people that nobody has noticed, the ones who don't fit the pattern, and the details that make them memorable. Be EXTREMELY specific: reference people BY NAME, give exact counts, and surface non-obvious connections.
 
 Here is the structured data for every team member. It is scraped from the company's own pages and is the ONLY evidence you have:
 
@@ -101,6 +110,31 @@ Here is the structured data for every team member. It is scraped from the compan
 
 Analysis, inference and a strong point of view are still wanted — draw connections between
 what the bios actually say. The rules above constrain your facts, not your judgment.
+
+## Who this is for
+
+Two readers, and the same dossier has to work for both: someone walking into a meeting with
+this company, and the company itself. Write something this team would find genuinely
+interesting about their own bench — sharp and specific, not flattering, but not a hit piece
+either. The test is whether a reader learns something about these people they did not
+already know.
+
+## Chase the interesting thing, not the checklist
+
+There is no fixed set of patterns to look for. The consulting-and-banking pedigree read is
+one possible finding, not the point of the exercise — for most teams it is the least
+interesting thing on the page. What actually connects a group varies wildly: a shared
+hometown, three people who all joined the same year, a cluster of competitive athletes, two
+people who worked at the same 40-person startup a decade ago, an unusual density of people
+who have run their own companies, a team where nobody has ever worked at a big tech company.
+Find what is true of THIS group and lead with it.
+
+**Never drop a zany fact.** The marathon swimmer, the patent holder, the person who was a
+professional oboist, the one who wrote a cookbook, the improbable career pivot, the
+side project that has nothing to do with their job — these are the most memorable and the
+most useful things in the whole dossier, and a bland analysis loses them first. If a bio
+contains something surprising about a person as a human being, it goes in, even when it
+fits none of the sections cleanly. Surface it under whichever section is closest.
 
 Produce analysis in the following 6 sections. Each section should be a JSON object with "title" and "content" (markdown string). The first 4 sections should read like intelligence analysis — opinionated, sharp, surprising. The last 2 are structured reference sections.
 
@@ -141,25 +175,30 @@ Sections to produce:
    - Be opinionated. This section should have a strong point of view.
 
 5. **Career Trajectories**
-   Structured breakdown of how these people got here, built ONLY from schools and employers
-   named in the bios above. Every pipeline below is a filter over that data, not a prompt to
-   recall who these people are — if no bio names a consultancy, the consulting pipeline
-   section says the pages don't disclose prior employers, and that is the whole answer:
-   - Education: MBA programs school-by-school with names (e.g., "Harvard Business School (8): Kent Bennett, Sarah Smith..."). What percentage have MBAs? Undergraduate institutions with names. Advanced degrees (PhDs, JDs, MDs) with names.
-   - Consulting pipeline: McKinsey, BCG, Bain alumni with names and counts
-   - Banking pipeline: Goldman, Morgan Stanley, etc. with names and counts
-   - Tech company alumni: Google, Meta, etc. with names and counts
-   - Founder/operator paths: who built companies before joining?
-   - Most unusual career pivots with brief descriptions
+   How these people actually got here, built ONLY from the schools and employers named in
+   the bios above.
+   - Start by finding the employers and schools that recur across this group, whatever they
+     are, and name who shares each one. A company three of them passed through matters far
+     more than which category it belongs to.
+   - Report the education this group actually has — degrees, fields and institutions with
+     names. If a credential is rare or unexpected here, say so; if the pages don't disclose
+     education, say that in one line rather than inferring it.
+   - Founder and operator paths: who has built or run something of their own?
+   - The most unusual pivots on the team, described concretely. This is usually the best
+     part of the section — someone who came to this work from an unrelated field is more
+     interesting than five people who took the expected route.
+   - Do not go looking for a consulting, banking or big-tech pipeline unless the bios put
+     one there. An absent pipeline is not a finding; a present and unexpected one is.
 
 6. **Team Composition Dashboard**
    Factual reference section with hard numbers, every one of them countable from the data.
    Omit any line the data cannot support rather than estimating it:
-   - Gender breakdown: exact counts and percentages, broken down by seniority level
-   - Geographic patterns if detectable (office locations, regional backgrounds)
-   - Industry specialization clusters with names
-   - Tenure patterns if detectable (long-timers vs. recent hires)
-   - Team size by group/function
+   - Team size by group or function, and anyone who sits in more than one
+   - Gender breakdown: exact counts and percentages
+   - Geographic patterns where the bios show them (locations, regional backgrounds)
+   - Industry or functional clusters with names
+   - Tenure where stated: who has been here longest, who arrived most recently
+   - Any other dimension this particular group varies on that is worth counting
 
 For smaller teams (<20 people), be deeply personal and mention almost everyone by name.
 For larger teams (50+), lead with statistical patterns but still name standouts.
@@ -175,3 +214,25 @@ Return the six sections under a "sections" key:
 }}
 
 This should read like a compelling, opinionated intelligence report — not a formulaic HR summary. Surprise the reader. Make them feel like they have an unfair advantage after reading this."""
+
+
+GROUNDING_CHECK_PROMPT = """You are auditing a team dossier for fabricated facts.
+
+Below are the SOURCE bios the dossier was built from, then the ANALYSIS written about them.
+
+List every organisation, school, degree, award and job title that the ANALYSIS attributes to
+a named person. For each one, quote the exact words from SOURCE that support it.
+
+- `quote` must be copied verbatim from SOURCE — character for character, not paraphrased.
+  It is checked against SOURCE by string match, so an approximate quote counts as a failure.
+- If nothing in SOURCE supports the claim, set `quote` to null. That is the finding this
+  audit exists to produce, so do not go looking for a loose match to make one fit.
+- A claim the analysis states as absent ("no bio names Bain") is not an attribution. Skip it.
+- Do not use your own knowledge of these people. A claim you happen to know is true is still
+  unsupported if SOURCE does not say it.
+
+SOURCE:
+{source}
+
+ANALYSIS:
+{analysis}"""

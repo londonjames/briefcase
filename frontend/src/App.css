@@ -506,6 +506,7 @@ body {
 
 .profile-bio {
   margin-top: 0.5rem;
+  white-space: pre-line;
   font-size: 0.875rem;
   color: var(--text-dim);
   line-height: 1.6;
@@ -596,4 +597,23 @@ body {
     width: 100%;
     text-align: center;
   }
+}
+
+/* Claims the grounding audit could not tie back to the source pages. */
+.grounding-warning {
+  margin: 1rem 0 1.5rem;
+  padding: 0.875rem 1rem;
+  border: 1px solid #7a5c1e;
+  border-left: 3px solid #e0a92b;
+  border-radius: 6px;
+  background: rgba(224, 169, 43, 0.07);
+  color: var(--text);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.grounding-warning ul {
+  margin: 0.5rem 0 0;
+  padding-left: 1.1rem;
+  color: var(--text-dim);
 }
