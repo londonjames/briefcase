@@ -175,27 +175,42 @@ as a human being, it goes in.
 Two sections, plus a third only on a large team. Each is a JSON object with "title" and
 "content" (markdown), and each finding inside gets a bold sub-heading.
 
-1. **The People**
-   The individuals, one at a time — who they are, how they got here, and the thing about
-   them worth remembering. This is where the zany facts live: the marathon swimmer, the
-   patent, the improbable pivot, the degree in something nobody expected.
+1. **The DNA of This Team**
+   Everything true across the group rather than about one person: what connects them, how
+   the bench was assembled, what it is heavy on and thin on, whether the company grows its
+   leaders or buys them. **At most four findings.** Apply the bar above — a shared employer
+   only counts when something about it is surprising.
 
-   Cover three to five people on a small team and the most interesting eight or so on a
-   large one. Two or three sentences each. Lead with whoever is genuinely most surprising,
-   not with whoever has the grandest title — the CEO goes first only if the CEO earns it.
-
-2. **What They Add Up To**
-   Everything that is true across the group rather than about one person: what connects
-   them, how the bench was assembled, what it is heavy on and thin on, whether the company
-   grows its leaders or buys them. **At most four findings.** Apply the bar above — a
-   shared employer only counts when something about it is surprising.
-
-   This section and the first divide cleanly: **a fact about one person belongs in The
-   People; a fact about the group belongs here.** A career you told in section 1 is not
-   re-told here — you may point at it in a clause and move on.
+   This section comes first, so the reader meets these names before they know who anyone is.
+   Give each person a few words of identification the first time they appear — "**Erica
+   Gessert**, the CFO" — and never more than that; the full story is the next section's job.
 
    Do not close on what it all means for the company's prospects. That is the reader's job
    and they did not ask you.
+
+2. **What's Unusual**
+   The things worth remembering about particular people — the improbable pivot, the degree
+   in something nobody expected, the patent, the Emmy, the person who arrived by a route
+   nobody else took.
+
+   **This is not a roll-call.** Do not work through the team giving everyone a paragraph.
+   Someone whose bio holds nothing unusual is simply not mentioned here, and that is the
+   correct outcome, not a gap to fill. A ten-person team might yield two entries; a
+   six-person team might yield five. Let the material decide.
+
+   The bar is the same as everywhere else: would the reader be mildly surprised? A senior
+   person having held a senior job before is not unusual. Being acquired rather than hired
+   is. Running the P&L with a law degree is. A master's in the exact discipline you now
+   practise is. If a bio is a clean, conventional record of good jobs, say nothing about it
+   — that person is already covered by the DNA section.
+
+   **Coverage is deliberately lopsided.** If one person's bio holds four surprising things —
+   an acquisition, a patent count, an unexpected degree, an award from another field — give
+   them all four. If the person in the next seat is chalk, a conventional record of sensible
+   jobs, give them nothing. Never even it out to be fair; evening it out is how a section of
+   real oddities turns back into a roster.
+
+   Skip the surname-only recap of a career the first section already used as evidence.
 
 3. **The Numbers** — **only when there are more than 15 people. Below that, omit it entirely
    and return two sections.** On a small team the reader has just met everyone by name, and
