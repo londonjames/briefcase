@@ -21,19 +21,22 @@ function SlugRoute() {
   useEffect(() => {
     const slug = `${company}/${date}`
 
-    // Try localStorage first
+    // Paint from cache immediately, then always revalidate. A dossier can be
+    // regenerated at the same slug — that is how a corrected one replaces a bad
+    // one — so a cache that never rechecks would pin a reader to the old version
+    // forever.
+    let painted = false
     const cached = localStorage.getItem(`briefcase:${slug}`)
     if (cached) {
       try {
         setDossier(JSON.parse(cached))
         setLoading(false)
-        return
+        painted = true
       } catch {
-        // corrupted, fall through to API
+        // corrupted, the fetch below replaces it
       }
     }
 
-    // Fetch from backend
     fetch(`${API_URL}/dossier/by-slug/${slug}`)
       .then((resp) => {
         if (!resp.ok) throw new Error('Not found')
@@ -41,11 +44,11 @@ function SlugRoute() {
       })
       .then((data) => {
         setDossier(data.result)
-        // Cache for future visits
         localStorage.setItem(`briefcase:${slug}`, JSON.stringify(data.result))
       })
       .catch(() => {
-        setError('This dossier was not found. It may have expired.')
+        // A cached copy on screen beats an error over the top of it.
+        if (!painted) setError('This dossier was not found. It may have expired.')
       })
       .finally(() => setLoading(false))
   }, [company, date])
