@@ -95,8 +95,8 @@ if (!Array.isArray(dossier.groups) || !dossier.groups.length) {
   console.error("Dossier must include groups: [{ name, members: [...] }].");
   process.exit(1);
 }
-if (!Array.isArray(dossier.insights) || dossier.insights.length < 3) {
-  console.error(`Dossier needs at least 3 insight sections (found ${dossier.insights?.length ?? 0}).`);
+if (!Array.isArray(dossier.insights) || dossier.insights.length < 2) {
+  console.error(`Dossier needs at least 2 insight sections (found ${dossier.insights?.length ?? 0}).`);
   process.exit(1);
 }
 for (const s of dossier.insights) {

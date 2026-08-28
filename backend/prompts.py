@@ -170,43 +170,47 @@ oboist, the cookbook, the improbable pivot. These are the most memorable things 
 dossier and a dry draft loses them first. If a bio says something surprising about a person
 as a human being, it goes in.
 
-## The four sections
+## The sections
 
-Produce four, in this order — or three, when section 4 does not apply. Each is a JSON object with "title" and "content"
-(markdown). Sections 1-3 carry **at most three findings each** — three good ones, not five
-thin ones. Use a bold sub-heading per finding.
+Two sections, plus a third only on a large team. Each is a JSON object with "title" and
+"content" (markdown), and each finding inside gets a bold sub-heading.
 
-1. **What Connects Them**
-   Threads running between these people that a reader would not spot on the source page.
-   Apply the bar above ruthlessly: if the thread is just "several of them worked at big
-   companies", it does not go in.
+1. **The People**
+   The individuals, one at a time — who they are, how they got here, and the thing about
+   them worth remembering. This is where the zany facts live: the marathon swimmer, the
+   patent, the improbable pivot, the degree in something nobody expected.
 
-2. **Worth Knowing**
-   The individuals a reader should remember, and why — the ones who don't fit the pattern,
-   arrived by a strange route, or carry something nobody else does. Three to five people,
-   two or three sentences each. This is where the zany facts live.
+   Cover three to five people on a small team and the most interesting eight or so on a
+   large one. Two or three sentences each. Lead with whoever is genuinely most surprising,
+   not with whoever has the grandest title — the CEO goes first only if the CEO earns it.
 
-3. **How This Team Was Built**
-   The shape of the group: what kind of person ends up in charge here, what the mix is heavy
-   and light on, whether it grows leaders or buys them. Named evidence, and let the pattern
-   speak. Do not re-tell findings from sections 1 and 2, and do not end on what it means for
-   the company's prospects — that is the reader's job, and they did not ask you.
+2. **What They Add Up To**
+   Everything that is true across the group rather than about one person: what connects
+   them, how the bench was assembled, what it is heavy on and thin on, whether the company
+   grows its leaders or buys them. **At most four findings.** Apply the bar above — a
+   shared employer only counts when something about it is surprising.
 
-4. **The Numbers** — **only when there are more than 15 people. Below that, omit this
-   section entirely and return three.** On a small team the reader has just met everyone by
-   name, and a tally hands their own reading back to them.
+   This section and the first divide cleanly: **a fact about one person belongs in The
+   People; a fact about the group belongs here.** A career you told in section 1 is not
+   re-told here — you may point at it in a clause and move on.
+
+   Do not close on what it all means for the company's prospects. That is the reader's job
+   and they did not ask you.
+
+3. **The Numbers** — **only when there are more than 15 people. Below that, omit it entirely
+   and return two sections.** On a small team the reader has just met everyone by name, and
+   a tally hands their own reading back to them.
 
    When it does apply: bullets only, no paragraphs, no analysis, nothing repeated from
    above. Counts worth checking — team size, gender split, arrival dates where stated,
-   repeated employers, education clusters, and any dimension this particular group actually
-   varies on.
+   repeated employers, education clusters, and any dimension this group actually varies on.
 
-   Never include a tally of "stated experience" built from bio boilerplate — every
-   executive page says "more than 20 years", so counting who said it measures nothing. Never
-   include company-level figures like revenue, headcount or countries served: this is a
-   dossier about people, and the company's own numbers belong to the company.
+   Never include a tally of "stated experience" built from bio boilerplate — every executive
+   page says "more than 20 years", so counting who said it measures nothing. Never include
+   company-level figures like revenue, headcount or countries served: this is a dossier about
+   people, and the company's own numbers belong to the company.
 
-Return the four sections under a "sections" key:
+Return the sections under a "sections" key:
 {{
   "sections": [
     {{
