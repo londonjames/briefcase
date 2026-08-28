@@ -12,12 +12,11 @@ client = anthropic.Anthropic()
 
 
 def _normalise(text):
-    """Compare quotes to source without tripping over smart quotes or wrapping.
+    """Compare quotes to source without tripping over presentation.
 
-    Quotes sometimes come back with the escape sequence rather than the
-    character — a literal backslash-u-2019 where the source has an apostrophe.
-    Left undecoded that fails the match and reports a true claim as fabricated,
-    which is the one kind of error that makes the warning worth ignoring.
+    Quotes come back with the source's own markdown emphasis around them, and
+    sometimes with a doubled escape sequence where a character belongs. Neither
+    changes what the source says, so neither should read as a fabrication.
     """
     if "\\u" in text:
         try:
@@ -26,7 +25,30 @@ def _normalise(text):
             pass
     for a, b in (("\u2019", "'"), ("\u2018", "'"), ("\u201c", '"'), ("\u201d", '"'), ("\u2014", "-"), ("\u2013", "-")):
         text = text.replace(a, b)
+    text = re.sub(r"[*_`]", "", text)
     return re.sub(r"\s+", " ", text).strip().lower()
+
+
+def _supported(quote, source_norm):
+    """Is this quote actually in the source?
+
+    An auditor sometimes elides the middle of a long quote with an ellipsis —
+    "CEO of... Proofpoint Inc." for a sentence naming two companies. The claim
+    is supported; only the quoting is loose. Requiring every segment to appear,
+    in order, keeps that honest without accepting a quote that was assembled
+    from unrelated fragments.
+    """
+    q = _normalise(quote)
+    if not q:
+        return False
+    segments = [seg for seg in re.split(r"\.{3}|\u2026", q) if seg.strip()]
+    position = 0
+    for segment in segments:
+        found = source_norm.find(segment.strip(), position)
+        if found == -1:
+            return False
+        position = found + len(segment.strip())
+    return True
 
 
 def _safe(fn, arg):
@@ -85,7 +107,7 @@ def check_grounding(insights, source_text):
             continue
         for claim in claims:
             quote = claim.get("quote")
-            if not quote or _normalise(quote) not in source_norm:
+            if not quote or not _supported(quote, source_norm):
                 unsupported.append(claim)
 
     if failed:

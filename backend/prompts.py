@@ -223,8 +223,9 @@ Below are the SOURCE bios the dossier was built from, then the ANALYSIS written 
 List every organisation, school, degree, award and job title that the ANALYSIS attributes to
 a named person. For each one, quote the exact words from SOURCE that support it.
 
-- `quote` must be copied verbatim from SOURCE — character for character, not paraphrased.
-  It is checked against SOURCE by string match, so an approximate quote counts as a failure.
+- `quote` must be copied verbatim from SOURCE — character for character, not paraphrased,
+  and one contiguous span rather than fragments stitched together with an ellipsis. It is
+  checked against SOURCE by string match, so an approximate quote counts as a failure.
 - If nothing in SOURCE supports the claim, set `quote` to null. That is the finding this
   audit exists to produce, so do not go looking for a loose match to make one fit.
 - A claim the analysis states as absent ("no bio names Bain") is not an attribution. Skip it.
