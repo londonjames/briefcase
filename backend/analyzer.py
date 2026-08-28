@@ -24,31 +24,46 @@ def check_grounding(insights, source_text):
     whether the quote is real by matching it against the source. That split
     matters — an auditor that is only asked "is this supported?" will happily
     say yes about something it invented, but it cannot fake a string match.
+
+    Audited one section at a time: a big team's six sections produce more claims
+    than one response can hold, and a truncated audit is worse than a partial one
+    because it looks complete. A section that fails is reported, never fatal —
+    a check that can take down the thing it is checking is not a safety net.
     """
-    analysis_text = "\n\n".join(f"## {s['title']}\n{s['content']}" for s in insights)
-
-    with tracked("briefcase", "grounding-check") as _t, client.messages.stream(
-        model="claude-sonnet-5",
-        max_tokens=32000,
-        output_config=json_format(GROUNDING_SCHEMA),
-        messages=[
-            {
-                "role": "user",
-                "content": GROUNDING_CHECK_PROMPT.format(
-                    source=source_text, analysis=analysis_text
-                ),
-            }
-        ],
-    ) as stream:
-        message = stream.get_final_message()
-        _t.log(message)
-
     source_norm = _normalise(source_text)
-    unsupported = []
-    for claim in parse_json(message)["claims"]:
-        quote = claim.get("quote")
-        if not quote or _normalise(quote) not in source_norm:
-            unsupported.append(claim)
+    unsupported, failed = [], []
+
+    for section in insights:
+        try:
+            with tracked("briefcase", "grounding-check") as _t, client.messages.stream(
+                model="claude-sonnet-5",
+                max_tokens=64000,
+                output_config=json_format(GROUNDING_SCHEMA),
+                messages=[
+                    {
+                        "role": "user",
+                        "content": GROUNDING_CHECK_PROMPT.format(
+                            source=source_text,
+                            analysis=f"## {section['title']}\n{section['content']}",
+                        ),
+                    }
+                ],
+            ) as stream:
+                message = stream.get_final_message()
+                _t.log(message)
+            claims = parse_json(message)["claims"]
+        except Exception as e:
+            print(f"Grounding check failed on '{section['title']}': {e}", flush=True)
+            failed.append(section["title"])
+            continue
+
+        for claim in claims:
+            quote = claim.get("quote")
+            if not quote or _normalise(quote) not in source_norm:
+                unsupported.append(claim)
+
+    if failed:
+        print(f"Grounding: {len(failed)} sections unaudited: {failed}", flush=True)
     return unsupported
 
 
