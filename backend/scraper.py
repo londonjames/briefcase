@@ -93,18 +93,20 @@ def extract_team_structure(html, url):
     if len(cleaned_html) > 300_000:
         cleaned_html = cleaned_html[:300_000]
 
-    with tracked("briefcase", "team-extract") as _t:
-        message = client.messages.create(
-            model="claude-sonnet-5",
-            max_tokens=8192,
-            output_config=json_format(TEAM_SCHEMA),
-            messages=[
-                {
-                    "role": "user",
-                    "content": f"The page URL is: {url}\n\nHTML content:\n\n{cleaned_html}\n\n{TEAM_EXTRACTION_PROMPT}",
-                }
-            ],
-        )
+    # A big team page is a lot of JSON — stream it so a long generation can't
+    # hit the request timeout, and give it room so it isn't cut off mid-member.
+    with tracked("briefcase", "team-extract") as _t, client.messages.stream(
+        model="claude-sonnet-5",
+        max_tokens=64000,
+        output_config=json_format(TEAM_SCHEMA),
+        messages=[
+            {
+                "role": "user",
+                "content": f"The page URL is: {url}\n\nHTML content:\n\n{cleaned_html}\n\n{TEAM_EXTRACTION_PROMPT}",
+            }
+        ],
+    ) as stream:
+        message = stream.get_final_message()
         _t.log(message)
 
     team_data = parse_json(message)
@@ -144,7 +146,7 @@ def fetch_profile(member, progress_callback=None):
         with tracked("briefcase", "profile-extract") as _t:
             message = client.messages.create(
                 model="claude-haiku-4-5-20251001",
-                max_tokens=4096,
+                max_tokens=16000,
                 output_config=json_format(PROFILE_SCHEMA),
                 messages=[
                     {

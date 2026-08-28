@@ -58,10 +58,11 @@ def test_response_text_skips_non_text_blocks():
     from structured import response_text
 
     message = types.SimpleNamespace(
+        stop_reason="end_turn",
         content=[
             types.SimpleNamespace(type="thinking", thinking="hmm"),
             types.SimpleNamespace(type="text", text='{"ok": true}'),
-        ]
+        ],
     )
     assert response_text(message) == '{"ok": true}'
 
@@ -70,12 +71,42 @@ def test_parse_json_reads_the_text_block():
     from structured import parse_json
 
     message = types.SimpleNamespace(
+        stop_reason="end_turn",
         content=[
             types.SimpleNamespace(type="thinking", thinking="hmm"),
             types.SimpleNamespace(type="text", text='{"sections": []}'),
-        ]
+        ],
     )
     assert parse_json(message) == {"sections": []}
+
+
+def test_parse_json_reports_truncation_clearly():
+    """Hitting max_tokens truncates the JSON; say so instead of a parse error."""
+    from structured import parse_json
+
+    message = types.SimpleNamespace(
+        stop_reason="max_tokens",
+        content=[types.SimpleNamespace(type="text", text='{"sections": [{"title": "Cul')],
+    )
+    try:
+        parse_json(message)
+    except ValueError as e:
+        assert "max_tokens" in str(e), f"unhelpful message: {e}"
+        return
+    raise AssertionError("expected a truncation error")
+
+
+def test_parse_json_reports_truncation_with_no_text_block():
+    """A truncated response can come back with no complete text block at all."""
+    from structured import parse_json
+
+    message = types.SimpleNamespace(stop_reason="max_tokens", content=[])
+    try:
+        parse_json(message)
+    except ValueError as e:
+        assert "max_tokens" in str(e), f"unhelpful message: {e}"
+        return
+    raise AssertionError("expected a truncation error")
 
 
 def test_schemas_are_strict():

@@ -26,7 +26,17 @@ def response_text(message):
 
 
 def parse_json(message):
-    """Parse the JSON body of a schema-constrained response."""
+    """Parse the JSON body of a schema-constrained response.
+
+    The schema guarantees valid JSON only for a response that finished. A run
+    that hits the output cap is cut off mid-string, so check for that first —
+    otherwise it surfaces as a baffling "Unterminated string" parse error.
+    """
+    if getattr(message, "stop_reason", None) == "max_tokens":
+        raise ValueError(
+            "Claude hit max_tokens and the JSON was cut off. Raise max_tokens "
+            "for this call, or feed it less input."
+        )
     return json.loads(response_text(message))
 
 
