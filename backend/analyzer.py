@@ -32,23 +32,46 @@ def _normalise(text):
 def _supported(quote, source_norm):
     """Is this quote actually in the source?
 
-    An auditor sometimes elides the middle of a long quote with an ellipsis —
-    "CEO of... Proofpoint Inc." for a sentence naming two companies. The claim
-    is supported; only the quoting is loose. Requiring every segment to appear,
-    in order, keeps that honest without accepting a quote that was assembled
-    from unrelated fragments.
+    Two kinds of loose quoting are honest and shouldn't read as fabrication: an
+    ellipsis eliding the middle of a long sentence, and a word or two of framing
+    added at the edges ("she is a certified public accountant" for a source that
+    says "and is a certified public accountant"). Both are tolerated by matching
+    segments in order and by trimming a few words off each end.
+
+    What is never tolerated is a quote whose core does not appear as a
+    contiguous run of the source — which is what an invented one looks like.
     """
     q = _normalise(quote)
     if not q:
         return False
-    segments = [seg for seg in re.split(r"\.{3}|\u2026", q) if seg.strip()]
-    position = 0
-    for segment in segments:
-        found = source_norm.find(segment.strip(), position)
-        if found == -1:
-            return False
-        position = found + len(segment.strip())
-    return True
+
+    segments = [seg.strip() for seg in re.split(r"\.{3}|\u2026", q) if seg.strip()]
+
+    def run_in_order(parts):
+        position = 0
+        for part in parts:
+            found = source_norm.find(part, position)
+            if found == -1:
+                return False
+            position = found + len(part)
+        return True
+
+    if run_in_order(segments):
+        return True
+
+    # Retry with up to two words trimmed from each end of the whole quote, so
+    # long as most of it still has to match.
+    words = q.split()
+    for lead in range(3):
+        for trail in range(3):
+            if lead + trail == 0:
+                continue
+            trimmed = words[lead : len(words) - trail or None]
+            if len(trimmed) < max(4, len(words) * 0.6):
+                continue
+            if run_in_order([" ".join(trimmed)]):
+                return True
+    return False
 
 
 def _safe(fn, arg):
