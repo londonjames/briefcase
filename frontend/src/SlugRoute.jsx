@@ -12,7 +12,7 @@ const getApiUrl = () => {
 const API_URL = getApiUrl()
 
 function SlugRoute() {
-  const { company, date } = useParams()
+  const { company, date, tab } = useParams()
   const navigate = useNavigate()
   const [dossier, setDossier] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -49,6 +49,12 @@ function SlugRoute() {
       })
       .finally(() => setLoading(false))
   }, [company, date])
+
+  // Insights gets its own address so it can be shared directly; anything else
+  // in that slot (an old link, a typo) falls back to the team view.
+  const activeTab = tab === 'insights' ? 'insights' : 'team'
+  const handleTabChange = (next) =>
+    navigate(next === 'insights' ? `/${company}/${date}/insights` : `/${company}/${date}`)
 
   const handleReset = () => navigate('/')
 
@@ -97,6 +103,8 @@ function SlugRoute() {
         {dossier && (
           <Dossier
             data={dossier}
+            tab={activeTab}
+            onTabChange={handleTabChange}
             onReset={handleReset}
             onExportNotion={handleExportNotion}
           />

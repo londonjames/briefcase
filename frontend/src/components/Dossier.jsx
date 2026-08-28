@@ -2,8 +2,12 @@ import { useState } from 'react'
 import ProfileCard from './ProfileCard'
 import InsightSection from './InsightSection'
 
-function Dossier({ data, onReset, onExportNotion }) {
-  const [activeTab, setActiveTab] = useState('team')
+function Dossier({ data, onReset, onExportNotion, tab, onTabChange }) {
+  // Controlled by the URL on a shared dossier; local state on the transient
+  // post-generation render, which has no slug to put in the address bar yet.
+  const [localTab, setLocalTab] = useState('team')
+  const activeTab = tab ?? localTab
+  const setActiveTab = onTabChange ?? setLocalTab
 
   // Flatten all members across groups, sort alphabetically by last name
   const allMembers = data.groups.flatMap((g) => g.members).sort((a, b) => {

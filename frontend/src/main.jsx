@@ -10,6 +10,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <BrowserRouter>
       <Routes>
         <Route path="/:company/:date" element={<SlugRoute />} />
+        <Route path="/:company/:date/:tab" element={<SlugRoute />} />
         <Route path="*" element={<App />} />
       </Routes>
     </BrowserRouter>
