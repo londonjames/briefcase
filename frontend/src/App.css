@@ -4,7 +4,29 @@
   box-sizing: border-box;
 }
 
+/* Light is the default. Dark is a deliberate click, remembered per reader. */
 :root {
+  --bg: #faf9f7;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f3f1ed;
+  --border: #e3e0da;
+  --border-light: #c7c3ba;
+  --text: #1a1917;
+  --text-dim: #4d4a45;
+  --text-muted: #7b776f;
+  --accent: #4f46e5;
+  --accent-dim: #4338ca;
+  --green: #15803d;
+  --danger: #dc2626;
+  --warn-bg: rgba(180, 130, 20, 0.09);
+  --warn-border: #d8c48a;
+  --warn-edge: #b8860b;
+  --shadow: 0 1px 2px rgba(20, 18, 14, 0.05);
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'Inter', -apple-system, sans-serif;
+}
+
+:root[data-theme="dark"] {
   --bg: #0a0a0a;
   --bg-card: #141414;
   --bg-card-hover: #1a1a1a;
@@ -16,8 +38,11 @@
   --accent: #6366f1;
   --accent-dim: #4f46e5;
   --green: #22c55e;
-  --mono: 'JetBrains Mono', monospace;
-  --sans: 'Inter', -apple-system, sans-serif;
+  --danger: #ef4444;
+  --warn-bg: rgba(224, 169, 43, 0.07);
+  --warn-border: #7a5c1e;
+  --warn-edge: #e0a92b;
+  --shadow: none;
 }
 
 body {
@@ -142,7 +167,7 @@ body {
   text-align: center;
   margin-top: 1rem;
   font-size: 0.85rem;
-  color: #ef4444;
+  color: var(--danger);
 }
 
 /* Progress */
@@ -603,10 +628,10 @@ body {
 .grounding-warning {
   margin: 1rem 0 1.5rem;
   padding: 0.875rem 1rem;
-  border: 1px solid #7a5c1e;
-  border-left: 3px solid #e0a92b;
+  border: 1px solid var(--warn-border);
+  border-left: 3px solid var(--warn-edge);
   border-radius: 6px;
-  background: rgba(224, 169, 43, 0.07);
+  background: var(--warn-bg);
   color: var(--text);
   font-size: 0.875rem;
   line-height: 1.6;
@@ -616,4 +641,49 @@ body {
   margin: 0.5rem 0 0;
   padding-left: 1.1rem;
   color: var(--text-dim);
+}
+
+/* Theme toggle */
+.app {
+  position: relative;
+}
+
+.theme-toggle {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.7rem;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.theme-toggle:hover {
+  color: var(--text);
+  border-color: var(--border-light);
+}
+
+.theme-toggle svg {
+  width: 14px;
+  height: 14px;
+}
+
+@media (max-width: 640px) {
+  .theme-toggle {
+    top: 0.75rem;
+    right: 0.75rem;
+    padding: 0.35rem 0.5rem;
+  }
+  .theme-toggle span {
+    display: none;
+  }
 }

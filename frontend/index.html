@@ -12,6 +12,15 @@
     <link rel="icon" type="image/svg+xml" href="/icon.svg" />
   </head>
   <body>
+    <script>
+      // Runs before React mounts so a reader who chose dark never sees a white flash.
+      try {
+        var t = localStorage.getItem('briefcase:theme');
+        document.documentElement.dataset.theme = t === 'dark' ? 'dark' : 'light';
+      } catch (e) {
+        document.documentElement.dataset.theme = 'light';
+      }
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

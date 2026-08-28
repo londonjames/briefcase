@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import Dossier from './components/Dossier'
+import ThemeToggle from './components/ThemeToggle'
 
 const getApiUrl = () => {
   if (import.meta.env.VITE_API_URL) {
@@ -81,6 +82,7 @@ function SlugRoute() {
 
   return (
     <div className="app">
+      <ThemeToggle />
       <header className="app-header">
         <h1 className="app-title" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
           briefcase

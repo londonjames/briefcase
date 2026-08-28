@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import UrlForm from './components/UrlForm'
 import Progress from './components/Progress'
 import Dossier from './components/Dossier'
+import ThemeToggle from './components/ThemeToggle'
 
 const getApiUrl = () => {
   if (import.meta.env.VITE_API_URL) {
@@ -113,6 +114,7 @@ function App() {
 
   return (
     <div className="app">
+      <ThemeToggle />
       <header className="app-header">
         <h1 className="app-title">briefcase</h1>
         <p className="app-subtitle">team dossier generator</p>
