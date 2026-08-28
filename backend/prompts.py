@@ -176,15 +176,17 @@ Produce four, in this order — or three, when section 4 does not apply. Each is
 (markdown). Sections 1-3 carry **at most three findings each** — three good ones, not five
 thin ones. Use a bold sub-heading per finding.
 
-1. **Hidden Patterns & Non-Obvious Connections**
-   Connections between these people that nobody has noticed. Apply the bar above ruthlessly:
-   if the pattern is just "several people worked at big companies", it does not go in.
+1. **What Connects Them**
+   Threads running between these people that a reader would not spot on the source page.
+   Apply the bar above ruthlessly: if the thread is just "several of them worked at big
+   companies", it does not go in.
 
-2. **The Standouts**
-   The individuals who break the mould, and why. Name three to five people and give each two
-   or three sentences. This is where the zany facts live.
+2. **Worth Knowing**
+   The individuals a reader should remember, and why — the ones who don't fit the pattern,
+   arrived by a strange route, or carry something nobody else does. Three to five people,
+   two or three sentences each. This is where the zany facts live.
 
-3. **What This Bench Is Made Of**
+3. **How This Team Was Built**
    The shape of the group: what kind of person ends up in charge here, what the mix is heavy
    and light on, whether it grows leaders or buys them. Named evidence, and let the pattern
    speak. Do not re-tell findings from sections 1 and 2, and do not end on what it means for
