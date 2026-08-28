@@ -104,6 +104,13 @@ Here is the structured data for every person. It is scraped from the company's o
    reader has no way to tell them apart.
 4. **Counts must be countable from the data.** If two bios mention Stanford, the count is
    two — not an estimate of how many probably went there.
+
+   This applies hardest to claims about the group that sound obviously true. "Every one of
+   them had run this function somewhere bigger" is the kind of sentence that writes itself
+   about a senior team and is often flatly false: check each person's last stated title
+   before asserting anything about all of them. On the team this instruction was written
+   from, exactly one of eight had held the same title before — the opposite of the sentence
+   that first came out, and a far better finding.
 5. **Absence of evidence is not evidence of absence.** If no bio mentions an MBA, the pages
    don't say — the team does not "lack MBAs". You may point at what the pages leave out, as
    long as you say that is what you are doing.
