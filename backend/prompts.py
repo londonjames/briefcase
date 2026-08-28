@@ -185,6 +185,13 @@ Two sections, plus a third only on a large team. Each is a JSON object with "tit
    Give each person a few words of identification the first time they appear — "**Erica
    Gessert**, the CFO" — and never more than that; the full story is the next section's job.
 
+   **State the pattern; do not spend the specifics.** This is the difference between a
+   dossier that reads once and one that repeats itself. "Every award on this page belongs to
+   the two founders" makes the point completely — naming the Emmy and the Hall of Fame
+   induction here burns the material the next section needs, and the reader then meets both
+   facts twice. Make the group-level observation with the fewest particulars that carry it,
+   and leave the good detail where it lands hardest.
+
    Do not close on what it all means for the company's prospects. That is the reader's job
    and they did not ask you.
 
