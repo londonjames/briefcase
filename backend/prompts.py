@@ -114,6 +114,14 @@ Here is the structured data for every person. It is scraped from the company's o
 5. **Absence of evidence is not evidence of absence.** If no bio mentions an MBA, the pages
    don't say — the team does not "lack MBAs". You may point at what the pages leave out, as
    long as you say that is what you are doing.
+6. **Do not rank one role against another.** "Which makes his move a step down in title on
+   paper" is a verdict wearing a fact's clothes, and it is the kind the audit cannot catch,
+   because no organisation in it is invented. State both roles — CEO of a $2.7B public
+   company, then COO here — and stop. The reader can decide what that means, and their
+   reading will be better informed than yours, because a bio does not say why anyone moved.
+7. **Copy identifiers exactly.** A stock exchange, a ticker, a year, a degree title. Writing
+   NASDAQ where the bio says NYSE is a fabrication with the same mechanics as inventing an
+   employer — it just looks too small to check.
 
 These constrain your facts, not your judgment. Opinions are wanted. Hedging every sentence
 is its own failure.
@@ -229,14 +237,37 @@ Two sections, plus a third only on a large team. Each is a JSON object with "tit
 
    **This is not a roll-call.** Do not work through the team giving everyone a paragraph.
    Someone whose bio holds nothing unusual is simply not mentioned here, and that is the
-   correct outcome, not a gap to fill. A ten-person team might yield two entries; a
-   six-person team might yield five. Let the material decide.
+   correct outcome, not a gap to fill. **Four entries is usually the right number and five is
+   the ceiling, however large the team** — going past that means the bar has dropped to fill
+   space, which is exactly how a section of genuine oddities becomes a roll-call again.
 
-   The bar is the same as everywhere else: would the reader be mildly surprised? A senior
-   person having held a senior job before is not unusual. Being acquired rather than hired
-   is. Running the P&L with a law degree is. A master's in the exact discipline you now
-   practise is. If a bio is a clean, conventional record of good jobs, say nothing about it
-   — that person is already covered by the DNA section.
+   The bar: **would someone repeat this at dinner?** Not "is it impressive" — impressive is
+   the wrong axis entirely, and confusing the two is how this section turns into a list of
+   résumé highlights.
+
+   Things that are **not** unusual, however good they look:
+
+   - **An award for doing your job well.** President's Club, salesperson of the year, "named
+     to the [industry] 300", recognition from a professional association. Every strong
+     senior person collects these; they are evidence of competence, not oddity.
+   - **Being a finalist** for anything.
+   - **Professional certifications in the field the person already works in.** A privacy
+     lawyer holding privacy certifications is a privacy lawyer.
+   - **A senior person having held a senior job before.**
+   - **A list.** Five certification acronyms in a row is a list, not a finding. If you cannot
+     say why one credential matters, name none of them.
+
+   Things that **are**: arriving by acquisition rather than hire. Running the P&L with a law
+   degree. A master's in the exact discipline you now practise. Writing a web standard.
+   Holding a patent count that belongs to a researcher. Moving from investor to operator.
+   And above all, the thing that has nothing to do with work — the bird photography, the
+   marathon swim, the cookbook, the Emmy on an engineer's page.
+
+   **Lead each entry with the strangest thing, not the most senior-sounding one.** If a bio
+   spends four sentences on standards committees and closes with "he is on a quest to
+   photograph every bird species in the world", the birds are the first line of that entry
+   and the committees are the second. A dossier that buries its best fact in a trailing
+   clause has wasted it.
 
    **Coverage is deliberately lopsided.** If one person's bio holds four surprising things —
    an acquisition, a patent count, an unexpected degree, an award from another field — give
