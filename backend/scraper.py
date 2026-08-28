@@ -1,5 +1,8 @@
+import time
+
 import requests
 import cloudscraper
+from curl_cffi import requests as curl_requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urlparse
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -25,26 +28,57 @@ HEADERS = {
 }
 
 
+class FetchError(Exception):
+    """No fetcher could retrieve the page."""
+
+
+def _fetch_requests(url):
+    resp = requests.get(url, headers=HEADERS, timeout=30, allow_redirects=True)
+    return resp.status_code, resp.text
+
+
+def _fetch_impersonated(url):
+    """Chrome's real TLS fingerprint — what Cloudflare checks before any header."""
+    resp = curl_requests.get(url, impersonate="chrome", timeout=30)
+    return resp.status_code, resp.text
+
+
+def _fetch_cloudscraper(url):
+    resp = cloudscraper.create_scraper().get(url, timeout=30)
+    return resp.status_code, resp.text
+
+
+FETCHERS = [
+    ("requests", _fetch_requests),
+    ("impersonated", _fetch_impersonated),
+    ("cloudscraper", _fetch_cloudscraper),
+]
+
+
 def fetch_page(url, retries=2):
-    """Fetch a web page and return its HTML content.
-    Falls back to cloudscraper for Cloudflare-protected pages."""
-    for attempt in range(retries + 1):
-        try:
-            resp = requests.get(url, headers=HEADERS, timeout=30, allow_redirects=True)
-            resp.raise_for_status()
-            return resp.text
-        except requests.exceptions.HTTPError as e:
-            if resp.status_code == 403:
-                # Cloudflare or similar — try cloudscraper
-                scraper = cloudscraper.create_scraper()
-                resp2 = scraper.get(url, timeout=30)
-                resp2.raise_for_status()
-                return resp2.text
-            if attempt < retries and resp.status_code in (429, 503):
-                import time
+    """Fetch a web page and return its HTML.
+
+    Plain requests handles most sites. Bot-protected ones reject it on the TLS
+    handshake before a single header is read, so we escalate to a Chrome-
+    impersonating client and then cloudscraper before giving up.
+    """
+    failures = []
+    for name, fetch in FETCHERS:
+        for attempt in range(retries + 1):
+            try:
+                status, text = fetch(url)
+            except Exception as e:
+                failures.append(f"{name}: {e}")
+                break
+            if status == 200:
+                return text
+            if status in (429, 503) and attempt < retries:
                 time.sleep(2 * (attempt + 1))
                 continue
-            raise
+            failures.append(f"{name}: HTTP {status}")
+            break
+
+    raise FetchError(f"Could not fetch {url} ({'; '.join(failures)})")
 
 
 def extract_team_structure(html, url):
