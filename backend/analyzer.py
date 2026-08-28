@@ -5,7 +5,7 @@ from concurrent.futures import ThreadPoolExecutor
 import anthropic
 
 from usage_logger import tracked
-from prompts import ANALYSIS_PROMPT, GROUNDING_CHECK_PROMPT
+from prompts import ANALYSIS_PROMPT, GROUNDING_CHECK_ANALYSIS, GROUNDING_CHECK_PROMPT
 from structured import ANALYSIS_SCHEMA, GROUNDING_SCHEMA, json_format, parse_json
 
 client = anthropic.Anthropic()
@@ -98,18 +98,32 @@ def check_grounding(insights, source_text):
     source_norm = _normalise(source_text)
     unsupported, failed = [], []
 
-    def audit(section):
+    def audit(batch):
         with tracked("briefcase", "grounding-check") as _t, client.messages.stream(
             model="claude-sonnet-5",
-            max_tokens=64000,
+            max_tokens=32000,
             output_config=json_format(GROUNDING_SCHEMA),
             messages=[
                 {
                     "role": "user",
-                    "content": GROUNDING_CHECK_PROMPT.format(
-                        source=source_text,
-                        analysis=f"## {section['title']}\n{section['content']}",
-                    ),
+                    "content": [
+                        # The bios are identical in every batch, so this block is
+                        # a stable prefix and gets cached. Without the split the
+                        # whole source was re-read at full price each time.
+                        {
+                            "type": "text",
+                            "text": GROUNDING_CHECK_PROMPT.format(source=source_text),
+                            "cache_control": {"type": "ephemeral"},
+                        },
+                        {
+                            "type": "text",
+                            "text": GROUNDING_CHECK_ANALYSIS.format(
+                                analysis="\n\n".join(
+                                    f"## {s['title']}\n{s['content']}" for s in batch
+                                )
+                            ),
+                        },
+                    ],
                 }
             ],
         ) as stream:
@@ -117,18 +131,24 @@ def check_grounding(insights, source_text):
             _t.log(message)
         return parse_json(message)["claims"]
 
-    # Six sequential audits added minutes to every dossier; they share no state.
-    with ThreadPoolExecutor(max_workers=6) as executor:
-        results = list(executor.map(
-            lambda sec: (sec, _safe(audit, sec)), insights
-        ))
+    # Three sections per call: one call for everything truncates on a big team,
+    # one call per section pays to re-audit the same claim six times over.
+    batches = [insights[i : i + 3] for i in range(0, len(insights), 3)]
+    with ThreadPoolExecutor(max_workers=len(batches) or 1) as executor:
+        results = list(executor.map(lambda b: (b, _safe(audit, b)), batches))
 
-    for section, (claims, error) in results:
+    seen_claims = set()
+    for batch, (claims, error) in results:
+        titles = ", ".join(s["title"] for s in batch)
         if error:
-            print(f"Grounding check failed on '{section['title']}': {error}", flush=True)
-            failed.append(section["title"])
+            print(f"Grounding check failed on [{titles}]: {error}", flush=True)
+            failed.extend(s["title"] for s in batch)
             continue
         for claim in claims:
+            key = (claim.get("person"), claim.get("claim"))
+            if key in seen_claims:
+                continue
+            seen_claims.add(key)
             quote = claim.get("quote")
             if not quote or not _supported(quote, source_norm):
                 unsupported.append(claim)

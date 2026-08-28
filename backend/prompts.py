@@ -221,19 +221,23 @@ GROUNDING_CHECK_PROMPT = """You are auditing a team dossier for fabricated facts
 Below are the SOURCE bios the dossier was built from, then the ANALYSIS written about them.
 
 List every organisation, school, degree, award and job title that the ANALYSIS attributes to
-a named person. For each one, quote the exact words from SOURCE that support it.
+a named person. For each one, quote the words from SOURCE that support it.
 
 - `quote` must be copied verbatim from SOURCE — character for character, not paraphrased,
   and one contiguous span rather than fragments stitched together with an ellipsis. It is
   checked against SOURCE by string match, so an approximate quote counts as a failure.
+- Keep the quote SHORT: the fewest words that prove the claim, at most about twelve. A long
+  quote is not a stronger one, and the check only needs the span that carries the fact.
 - If nothing in SOURCE supports the claim, set `quote` to null. That is the finding this
   audit exists to produce, so do not go looking for a loose match to make one fit.
+- List each distinct claim ONCE, even when several sections repeat it.
 - A claim the analysis states as absent ("no bio names Bain") is not an attribution. Skip it.
 - Do not use your own knowledge of these people. A claim you happen to know is true is still
   unsupported if SOURCE does not say it.
 
 SOURCE:
-{source}
+{source}"""
 
-ANALYSIS:
+
+GROUNDING_CHECK_ANALYSIS = """ANALYSIS:
 {analysis}"""
