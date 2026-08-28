@@ -10,6 +10,12 @@ For each person return:
   have no separate profile page — that text is the only evidence the dossier will ever get,
   so do not summarise it and do not skip it. Use null only when the page truly has none.
 
+Extract the OPERATING TEAM ONLY. Skip the board of directors, advisory boards, investors
+and trustees entirely — they do not run the company day to day, and a dossier about the
+people who do gets diluted the moment they are mixed in. A founder-CEO who also sits on the
+board is part of the operating team; a director who holds no executive role is not. The one
+exception is a page that lists nothing but a board — then the board is the team.
+
 Identify any team groupings visible in the HTML (sections, tabs, categories, departments).
 If there are no clear groupings, put everyone in a single group called "Team".
 
@@ -79,9 +85,9 @@ Important:
   downstream can recover one you leave out.
 - If a section has no data, use an empty array []"""
 
-ANALYSIS_PROMPT = """You are an intelligence analyst producing a team dossier on {team_count} people at {company}. Your job is to find what others miss — the connections between these people that nobody has noticed, the ones who don't fit the pattern, and the details that make them memorable. Be EXTREMELY specific: reference people BY NAME, give exact counts, and surface non-obvious connections.
+ANALYSIS_PROMPT = """You are writing a dossier on the {team_count} people who run {company}. Find what a reader would not get by skimming the same page themselves.
 
-Here is the structured data for every team member. It is scraped from the company's own pages and is the ONLY evidence you have:
+Here is the structured data for every person. It is scraped from the company's own pages and is the ONLY evidence you have:
 
 {team_data}
 
@@ -92,128 +98,121 @@ Here is the structured data for every team member. It is scraped from the compan
 2. **You may recognise some of these people. Ignore what you know.** Anything you recall
    about where someone worked, studied, or what they founded is not evidence — this dossier
    is about what their employer publishes, and your memory is frequently wrong about which
-   person of that name did what. A title is not a career history: "Chief Business Officer"
-   tells you nothing about whether they were ever at Bain.
+   person of that name did what. A title is not a career history.
 3. **Never name a company, school, degree, fund, or achievement that does not appear in the
-   data.** This is the single most damaging failure mode: a fabricated alma mater or a
-   made-up employer reads exactly as confidently as a real one, and the reader has no way to
-   tell them apart.
-4. **Counts and percentages must be countable from the data.** If two bios mention Stanford,
-   the count is two — not an estimate of how many probably went there.
-5. **Say when you don't know.** A section with thin evidence gets a short, direct statement
-   of what the source pages don't reveal. One honest line beats five invented ones, and the
-   reader can then go find the missing material. Never use "Confirmed:" or similar
-   certainty language on anything you inferred.
-6. **Absence of evidence is not evidence of absence.** If no bio mentions an MBA, that means
-   the pages don't say — not that the team has a low MBA rate. Do not build a finding out of
-   what is missing from the scrape.
+   data.** A fabricated alma mater reads exactly as confidently as a real one, and the
+   reader has no way to tell them apart.
+4. **Counts must be countable from the data.** If two bios mention Stanford, the count is
+   two — not an estimate of how many probably went there.
+5. **Absence of evidence is not evidence of absence.** If no bio mentions an MBA, the pages
+   don't say — the team does not "lack MBAs". You may point at what the pages leave out, as
+   long as you say that is what you are doing.
 
-Analysis, inference and a strong point of view are still wanted — draw connections between
-what the bios actually say. The rules above constrain your facts, not your judgment.
+These constrain your facts, not your judgment. Opinions are wanted. Hedging every sentence
+is its own failure.
 
 ## Who this is for
 
 Two readers, and the same dossier has to work for both: someone walking into a meeting with
 this company, and the company itself. Write something this team would find genuinely
-interesting about their own bench — sharp and specific, not flattering, but not a hit piece
-either. The test is whether a reader learns something about these people they did not
-already know.
+interesting about their own bench.
 
-## Chase the interesting thing, not the checklist
+## What counts as a finding
 
-There is no fixed set of patterns to look for. The consulting-and-banking pedigree read is
-one possible finding, not the point of the exercise — for most teams it is the least
-interesting thing on the page. What actually connects a group varies wildly: a shared
-hometown, three people who all joined the same year, a cluster of competitive athletes, two
-people who worked at the same 40-person startup a decade ago, an unusual density of people
-who have run their own companies, a team where nobody has ever worked at a big tech company.
-Find what is true of THIS group and lead with it.
+**A shared employer is not a hidden pattern.** Three people who worked at Google is a fact
+the reader can see for themselves in ten seconds. It clears the bar only when something
+about it is surprising — they overlapped on the same small team, they all left in the same
+year, or the company has nothing to do with this one.
 
-**Never drop a zany fact.** The marathon swimmer, the patent holder, the person who was a
-professional oboist, the one who wrote a cookbook, the improbable career pivot, the
-side project that has nothing to do with their job — these are the most memorable and the
-most useful things in the whole dossier, and a bland analysis loses them first. If a bio
-contains something surprising about a person as a human being, it goes in, even when it
-fits none of the sections cleanly. Surface it under whichever section is closest.
+Test every paragraph: *does the reader learn something they could not have got by reading
+the source page?* If not, cut it. A shorter dossier that earns every paragraph beats a
+complete one that doesn't.
 
-Produce analysis in the following 6 sections. Each section should be a JSON object with "title" and "content" (markdown string). The first 4 sections should read like intelligence analysis — opinionated, sharp, surprising. The last 2 are structured reference sections.
+Two shapes reliably clear the bar. The first is **an argument about the group** — named
+evidence, then a judgment:
 
-Sections to produce:
+> Hayden Brown is the one clear case of internal ascension: she joined in 2011 as a product
+> manager and worked up through the marketplace business, chief product officer and chief
+> marketing officer before becoming CEO in 2020. Every other executive arrived from outside,
+> several via acquisition rather than hire. That makes her start date the longest tenure on
+> the page by a wide margin, and the only evidence of a pipeline growing its own CEO.
+
+The second is **a person who does not fit the group at all** — the improbable pivot, the
+Emmy on the chip designer's bio, the credential nobody else has.
+
+## Say it once
+
+A fact belongs to exactly one paragraph in the entire dossier. If someone's PayPal history
+carries a finding in the first section, it does not reappear in the third. Repetition is the
+single biggest thing that made earlier versions of this dossier tedious.
+
+## Voice
+
+Dry, observational, faintly amused. You are **pointing things out, not handing down
+verdicts** — the difference is the whole register:
+
+> Two law degrees sit on this team and only one of them is doing law.  ← pointing it out
+> This reflects a deliberate strategy of embedding legal rigour in the operating core.  ← judging
+
+Point at the incongruity and leave it there. The reader is clever and can decide what it
+means. Never tell them what to conclude, never close a section with what it all means for
+the business, and never explain why something is funny.
+
+The humour comes from the observation itself, never from the writing. No puns, no clever
+inversions, no aphorisms, no dramatic one-line fragments for effect. If a sentence looks
+like it was built to be quoted, delete it. This is a raised eyebrow, not a comedy set.
+
+Short declarative sentences. Name the thing. Never open a section by announcing what the
+section is about, and never write a sentence whose only job is to introduce the next one.
+
+**Never drop a zany fact.** The marathon swimmer, the patent holder, the professional
+oboist, the cookbook, the improbable pivot. These are the most memorable things in the whole
+dossier and a dry draft loses them first. If a bio says something surprising about a person
+as a human being, it goes in.
+
+## The four sections
+
+Produce four, in this order — or three, when section 4 does not apply. Each is a JSON object with "title" and "content"
+(markdown). Sections 1-3 carry **at most three findings each** — three good ones, not five
+thin ones. Use a bold sub-heading per finding.
 
 1. **Hidden Patterns & Non-Obvious Connections**
-   Write this like an intelligence briefing. Find cross-cutting patterns that aren't visible at first glance:
-   - Unexpected clusters: people who share obscure alma maters, worked at the same company in overlapping years, or have parallel career arcs
-   - Network overlaps: board connections, co-investments, shared mentors or professional circles
-   - Surprising gaps: what's conspicuously absent from this team (geographies, industries, backgrounds, skill sets)?
-   - Timing patterns: did hiring waves coincide with fund cycles, market events, or leadership changes?
-   - Name individuals and draw specific connections between them.
+   Connections between these people that nobody has noticed. Apply the bar above ruthlessly:
+   if the pattern is just "several people worked at big companies", it does not go in.
 
 2. **The Standouts**
-   Profile the most interesting individuals on the team — people who break the mold:
-   - Unusual career pivots (e.g., military to VC, academia to operator, journalist to investor)
-   - Multi-hyphenates with rare skill combinations
-   - Founder/operator-turned-investors and what they built
-   - Notable personal achievements (Olympians, published authors, patent holders, elected officials)
-   - Rising stars: junior people with outsized backgrounds
-   - For each standout, write 2-3 sentences explaining what makes them distinctive. Name at least 4-6 individuals.
+   The individuals who break the mould, and why. Name three to five people and give each two
+   or three sentences. This is where the zany facts live.
 
-3. **Power Dynamics & Influence Map**
-   Analyze the team's internal power structure and external influence:
-   - Seniority pyramid: exact counts at each level (Partner, Principal, VP, Associate, etc.)
-   - Who are the connectors? People with the most external board seats, advisory roles, or public presence
-   - Thought leadership: podcasts, publications, frequent speakers, Twitter/X presence
-   - Mentorship pipelines: evidence of internal promotion patterns vs. external hires at senior levels
-   - Decision-making concentration: is power distributed or concentrated among a few?
-   - Name specific people in each category.
+3. **What This Bench Is Made Of**
+   The shape of the group: what kind of person ends up in charge here, what the mix is heavy
+   and light on, whether it grows leaders or buys them. Named evidence, and let the pattern
+   speak. Do not re-tell findings from sections 1 and 2, and do not end on what it means for
+   the company's prospects — that is the reader's job, and they did not ask you.
 
-4. **Cultural DNA**
-   Read the tea leaves — what does this team's composition reveal about the organization's values and identity?
-   - Dominant archetypes: what "type" of person does this firm hire? (e.g., ex-consultants, technical founders, pedigree collectors)
-   - What the personal interests reveal: are there clusters around athletics, arts, activism, or something else?
-   - Conspicuous absences: what kinds of people or backgrounds are noticeably missing?
-   - If you had to describe this team's personality in one sentence, what would it be?
-   - Be opinionated. This section should have a strong point of view.
+4. **The Numbers** — **only when there are more than 15 people. Below that, omit this
+   section entirely and return three.** On a small team the reader has just met everyone by
+   name, and a tally hands their own reading back to them.
 
-5. **Career Trajectories**
-   How these people actually got here, built ONLY from the schools and employers named in
-   the bios above.
-   - Start by finding the employers and schools that recur across this group, whatever they
-     are, and name who shares each one. A company three of them passed through matters far
-     more than which category it belongs to.
-   - Report the education this group actually has — degrees, fields and institutions with
-     names. If a credential is rare or unexpected here, say so; if the pages don't disclose
-     education, say that in one line rather than inferring it.
-   - Founder and operator paths: who has built or run something of their own?
-   - The most unusual pivots on the team, described concretely. This is usually the best
-     part of the section — someone who came to this work from an unrelated field is more
-     interesting than five people who took the expected route.
-   - Do not go looking for a consulting, banking or big-tech pipeline unless the bios put
-     one there. An absent pipeline is not a finding; a present and unexpected one is.
+   When it does apply: bullets only, no paragraphs, no analysis, nothing repeated from
+   above. Counts worth checking — team size, gender split, arrival dates where stated,
+   repeated employers, education clusters, and any dimension this particular group actually
+   varies on.
 
-6. **Team Composition Dashboard**
-   Factual reference section with hard numbers, every one of them countable from the data.
-   Omit any line the data cannot support rather than estimating it:
-   - Team size by group or function, and anyone who sits in more than one
-   - Gender breakdown: exact counts and percentages
-   - Geographic patterns where the bios show them (locations, regional backgrounds)
-   - Industry or functional clusters with names
-   - Tenure where stated: who has been here longest, who arrived most recently
-   - Any other dimension this particular group varies on that is worth counting
+   Never include a tally of "stated experience" built from bio boilerplate — every
+   executive page says "more than 20 years", so counting who said it measures nothing. Never
+   include company-level figures like revenue, headcount or countries served: this is a
+   dossier about people, and the company's own numbers belong to the company.
 
-For smaller teams (<20 people), be deeply personal and mention almost everyone by name.
-For larger teams (50+), lead with statistical patterns but still name standouts.
-
-Return the six sections under a "sections" key:
+Return the four sections under a "sections" key:
 {{
   "sections": [
     {{
       "title": "Section Title",
-      "content": "## Heading\\n\\nMarkdown content with **bold names**, bullet points, exact numbers..."
+      "content": "**A finding**\\n\\nMarkdown with **bold names**, exact numbers..."
     }}
   ]
-}}
-
-This should read like a compelling, opinionated intelligence report — not a formulaic HR summary. Surprise the reader. Make them feel like they have an unfair advantage after reading this."""
+}}"""
 
 
 GROUNDING_CHECK_PROMPT = """You are auditing a team dossier for fabricated facts.
