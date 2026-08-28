@@ -67,9 +67,46 @@ if (args[0] === "--show") {
 }
 
 if (args[0] === "--list") {
+  // The private archive. Reading it needs this machine and the Upstash
+  // credentials, so the listing itself is the access control.
   const keys = (await redis(["KEYS", "briefcase:*"])) ?? [];
-  console.log(`${keys.length} stored:`);
-  for (const k of keys.slice(0, 40)) console.log(`  ${SITE}/${k.replace("briefcase:", "")}`);
+  const rows = [];
+  for (const k of keys) {
+    const slug = k.replace("briefcase:", "");
+    let d = {};
+    try {
+      const raw = await redis(["GET", k]);
+      d = typeof raw === "string" ? JSON.parse(raw) : raw ?? {};
+    } catch {
+      // a corrupted entry still deserves its slug listed
+    }
+    const members = (d.groups ?? []).flatMap((g) => g.members ?? []);
+    const [, dateSlug] = slug.split("/");
+    const m = /^(\d{1,2})([A-Za-z]+)(\d{4})$/.exec(dateSlug ?? "");
+    const when = m ? new Date(`${m[2]} ${m[1]}, ${m[3]}`) : new Date(0);
+    rows.push({
+      slug,
+      when,
+      date: m ? `${m[1]} ${m[2].slice(0, 3)} ${m[3]}` : dateSlug ?? "?",
+      company: d.company ?? slug.split("/")[0],
+      people: members.length,
+      bios: members.filter((x) => x.bio && x.bio.length > 40).length,
+      sections: (d.insights ?? []).length,
+    });
+  }
+
+  rows.sort((a, b) => b.when - a.when);
+  console.log(`${rows.length} dossiers, newest first\n`);
+  for (const r of rows) {
+    const evidence = r.people ? `${r.bios}/${r.people} bios` : "no people";
+    const flag = r.people === 0 ? "  [EMPTY]" : r.bios < r.people ? "  [thin]" : "";
+    console.log(
+      `  ${r.date.padEnd(12)} ${String(r.company).slice(0, 26).padEnd(28)} ` +
+        `${String(r.people).padStart(3)} people  ${evidence.padEnd(14)} ` +
+        `${r.sections} sections${flag}`
+    );
+    console.log(`  ${" ".repeat(12)} ${SITE}/${r.slug}`);
+  }
   process.exit(0);
 }
 
