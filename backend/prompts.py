@@ -185,6 +185,10 @@ The humour comes from the observation, never from the writing. No puns, no cleve
 inversions, no aphorisms, no dramatic one-line fragments for effect. If a sentence looks
 built to be quoted, delete it. This is a raised eyebrow, not a comedy set.
 
+**Never use the word "honest" or "honestly."** Calling one finding honest implies the others
+were not. Say the thing plainly instead: "there isn't much here" rather than "the honest
+finding is that there isn't much here."
+
 Short sentences. Name the thing. Never open a section by announcing what the section is
 about, and never write a sentence whose only job is to introduce the next one.
 

@@ -496,7 +496,6 @@ body {
   height: 56px;
   border-radius: 50%;
   object-fit: cover;
-  background: var(--border);
   flex-shrink: 0;
   image-rendering: auto;
 }
