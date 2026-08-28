@@ -1,5 +1,6 @@
 import json
 import re
+from concurrent.futures import ThreadPoolExecutor
 
 import anthropic
 
@@ -15,6 +16,14 @@ def _normalise(text):
     for a, b in (("\u2019", "'"), ("\u2018", "'"), ("\u201c", '"'), ("\u201d", '"'), ("\u2014", "-"), ("\u2013", "-")):
         text = text.replace(a, b)
     return re.sub(r"\s+", " ", text).strip().lower()
+
+
+def _safe(fn, arg):
+    """Run fn, returning (result, error) — a failed audit must not kill the run."""
+    try:
+        return fn(arg), None
+    except Exception as e:
+        return None, str(e)
 
 
 def check_grounding(insights, source_text):
@@ -33,30 +42,36 @@ def check_grounding(insights, source_text):
     source_norm = _normalise(source_text)
     unsupported, failed = [], []
 
-    for section in insights:
-        try:
-            with tracked("briefcase", "grounding-check") as _t, client.messages.stream(
-                model="claude-sonnet-5",
-                max_tokens=64000,
-                output_config=json_format(GROUNDING_SCHEMA),
-                messages=[
-                    {
-                        "role": "user",
-                        "content": GROUNDING_CHECK_PROMPT.format(
-                            source=source_text,
-                            analysis=f"## {section['title']}\n{section['content']}",
-                        ),
-                    }
-                ],
-            ) as stream:
-                message = stream.get_final_message()
-                _t.log(message)
-            claims = parse_json(message)["claims"]
-        except Exception as e:
-            print(f"Grounding check failed on '{section['title']}': {e}", flush=True)
+    def audit(section):
+        with tracked("briefcase", "grounding-check") as _t, client.messages.stream(
+            model="claude-sonnet-5",
+            max_tokens=64000,
+            output_config=json_format(GROUNDING_SCHEMA),
+            messages=[
+                {
+                    "role": "user",
+                    "content": GROUNDING_CHECK_PROMPT.format(
+                        source=source_text,
+                        analysis=f"## {section['title']}\n{section['content']}",
+                    ),
+                }
+            ],
+        ) as stream:
+            message = stream.get_final_message()
+            _t.log(message)
+        return parse_json(message)["claims"]
+
+    # Six sequential audits added minutes to every dossier; they share no state.
+    with ThreadPoolExecutor(max_workers=6) as executor:
+        results = list(executor.map(
+            lambda sec: (sec, _safe(audit, sec)), insights
+        ))
+
+    for section, (claims, error) in results:
+        if error:
+            print(f"Grounding check failed on '{section['title']}': {error}", flush=True)
             failed.append(section["title"])
             continue
-
         for claim in claims:
             quote = claim.get("quote")
             if not quote or _normalise(quote) not in source_norm:

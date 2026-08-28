@@ -203,51 +203,68 @@ def fetch_profile(member, progress_callback=None):
     if not profile_url and not inline_bio:
         return {**member, "bio": None, "education": [], "career": [], "personal": []}
 
-    try:
-        if profile_url:
-            html = fetch_page(profile_url)
-            soup = BeautifulSoup(html, "html.parser")
-            for tag in soup(["script", "style", "nav", "footer", "noscript", "svg", "iframe"]):
-                tag.decompose()
-            cleaned_html = str(soup)
-        else:
-            cleaned_html = inline_bio
+    for attempt in range(3):
+        try:
+            return _extract_profile(member, profile_url, inline_bio)
+        except Exception as e:
+            if attempt < 2:
+                time.sleep(2 * (attempt + 1))
+                continue
+            # Returning an empty profile here would be indistinguishable from a
+            # person whose page says nothing about them — which is how evidence
+            # goes missing without anyone noticing. Say so instead.
+            print(f"Profile extraction failed for {member['name']}: {e}", flush=True)
+            return {
+                **member,
+                "bio": inline_bio,
+                "education": [],
+                "career": [],
+                "personal": [],
+                "extraction_failed": True,
+            }
 
-        if len(cleaned_html) > 100_000:
-            cleaned_html = cleaned_html[:100_000]
 
-        prompt = PROFILE_EXTRACTION_PROMPT.format(
-            name=member["name"], title=member.get("title", "Unknown")
+def _extract_profile(member, profile_url, inline_bio):
+    if profile_url:
+        html = fetch_page(profile_url)
+        soup = BeautifulSoup(html, "html.parser")
+        for tag in soup(["script", "style", "nav", "footer", "noscript", "svg", "iframe"]):
+            tag.decompose()
+        cleaned_html = str(soup)
+    else:
+        cleaned_html = inline_bio
+
+    if len(cleaned_html) > 100_000:
+        cleaned_html = cleaned_html[:100_000]
+
+    prompt = PROFILE_EXTRACTION_PROMPT.format(
+        name=member["name"], title=member.get("title", "Unknown")
+    )
+
+    with tracked("briefcase", "profile-extract") as _t:
+        message = client.messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=16000,
+            output_config=json_format(PROFILE_SCHEMA),
+            messages=[
+                {
+                    "role": "user",
+                    "content": (
+                        f"Profile page URL: {profile_url}\n\nHTML:\n\n{cleaned_html}"
+                        if profile_url
+                        else f"Biography text from {member['name']}'s team page:\n\n{cleaned_html}"
+                    )
+                    + f"\n\n{prompt}",
+                }
+            ],
         )
+        _t.log(message)
 
-        with tracked("briefcase", "profile-extract") as _t:
-            message = client.messages.create(
-                model="claude-haiku-4-5-20251001",
-                max_tokens=16000,
-                output_config=json_format(PROFILE_SCHEMA),
-                messages=[
-                    {
-                        "role": "user",
-                        "content": (
-                            f"Profile page URL: {profile_url}\n\nHTML:\n\n{cleaned_html}"
-                            if profile_url
-                            else f"Biography text from {member['name']}'s team page:\n\n{cleaned_html}"
-                        )
-                        + f"\n\n{prompt}",
-                    }
-                ],
-            )
-            _t.log(message)
-
-        profile_data = parse_json(message)
-        merged = {**member, **profile_data}
-        if not merged.get("bio"):
-            merged["bio"] = inline_bio
-        return merged
-
-    except Exception as e:
-        print(f"Error fetching profile for {member['name']}: {e}")
-        return {**member, "bio": inline_bio, "education": [], "career": [], "personal": []}
+    profile_data = parse_json(message)
+    merged = {**member, **profile_data}
+    if not merged.get("bio"):
+        merged["bio"] = inline_bio
+    return merged
 
 
 def _person_key(name):
