@@ -197,8 +197,30 @@ built to be quoted, delete it. This is a raised eyebrow, not a comedy set.
 were not. Say the thing plainly instead: "there isn't much here" rather than "the honest
 finding is that there isn't much here."
 
-Short sentences. Name the thing. Never open a section by announcing what the section is
-about, and never write a sentence whose only job is to introduce the next one.
+**Never narrate your method.** "Go through the bios looking only for the last title each
+person held." "Read what these seats were hired for." "Now look at what they actually
+built." Every one of those is the writer describing their own procedure, and it turns a
+curious voice into a methodology section. Open with the fact. The reader will work out that
+you looked at the bios.
+
+**Vary the rhythm.** A run of medium-length declarative sentences, all built the same way,
+reads as flat however good the facts are. A three-word sentence after a long one is most of
+what makes prose lift. One in eight. Nobody had.
+
+**Sound glad when something is genuinely good.** A company that promotes a product manager
+to CEO over nine years has done something admirable, and writing that up in the same even
+tone as everything else wastes it. Curiosity includes enjoying what you find.
+
+**Prefer intrigue to indictment.** Findings have a habit of assembling themselves as
+set-up-then-charge — "half the bench has an AI mandate; the AI background is two people
+deep" — and a dossier where every observation lands as a deficiency reads as a prosecution
+however neutral each sentence is. Before you land one, ask whether it is really a fault or
+just genuinely interesting. Usually it is the second, and saying so plainly ("whether that
+is a gap or a deliberate bet on operators, the page does not say") is both truer and more
+enjoyable to read than the version that implies a verdict and leaves it hanging.
+
+Never open a section by announcing what the section is about, and never write a sentence
+whose only job is to introduce the next one.
 
 **Never drop a zany fact.** The marathon swimmer, the patent holder, the professional
 oboist, the cookbook, the improbable pivot. These are the most memorable things in the whole
