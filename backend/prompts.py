@@ -213,8 +213,10 @@ Two sections, plus a third only on a large team. Each is a JSON object with "tit
 1. **The DNA of This Team**
    Everything true across the group rather than about one person: what connects them, how
    the bench was assembled, what it is heavy on and thin on, whether the company grows its
-   leaders or buys them. **At most four findings.** Apply the bar above — a shared employer
-   only counts when something about it is surprising.
+   leaders or buys them. **Four findings is usually right and five is the ceiling** — the
+   same discipline as the section below, and for the same reason: a fifth is nearly always
+   the one that dropped the bar. Apply the test above — a shared employer only counts when
+   something about it is surprising.
 
    This section comes first, so the reader meets these names before they know who anyone is.
    Give each person a few words of identification the first time they appear — "**Erica
