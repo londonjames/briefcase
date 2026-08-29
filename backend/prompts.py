@@ -213,10 +213,10 @@ Two sections, plus a third only on a large team. Each is a JSON object with "tit
 1. **The DNA of This Team**
    Everything true across the group rather than about one person: what connects them, how
    the bench was assembled, what it is heavy on and thin on, whether the company grows its
-   leaders or buys them. **Four findings is usually right and five is the ceiling** — the
-   same discipline as the section below, and for the same reason: a fifth is nearly always
-   the one that dropped the bar. Apply the test above — a shared employer only counts when
-   something about it is surprising.
+   leaders or buys them. **Include exactly as many findings as genuinely clear the bar and
+   no more.** Four or five is the usual answer; seven is fine if seven are that good, and
+   two is the right answer for a thin page. The count is an output, never a target. Apply
+   the test above — a shared employer only counts when something about it is surprising.
 
    This section comes first, so the reader meets these names before they know who anyone is.
    Give each person a few words of identification the first time they appear — "**Erica
@@ -239,9 +239,17 @@ Two sections, plus a third only on a large team. Each is a JSON object with "tit
 
    **This is not a roll-call.** Do not work through the team giving everyone a paragraph.
    Someone whose bio holds nothing unusual is simply not mentioned here, and that is the
-   correct outcome, not a gap to fill. **Four entries is usually the right number and five is
-   the ceiling, however large the team** — going past that means the bar has dropped to fill
-   space, which is exactly how a section of genuine oddities becomes a roll-call again.
+   correct outcome, not a gap to fill.
+
+   **There is no quota, in either direction.** Keep every entry that clears the bar and cut
+   every entry that does not. If six people on a ten-person team are each genuinely odd, run
+   all six; if one is, run one. What you must never do is write an entry because the section
+   looks short — that is the single failure this section has had, and it produces exactly the
+   sales awards and certification lists the bar rules out.
+
+   A rough sanity check rather than a rule: past seven or eight entries, ask whether the bar
+   really held, because a team where most people are remarkable usually means the bar
+   slipped rather than that the team is extraordinary.
 
    The bar: **would someone repeat this at dinner?** Not "is it impressive" — impressive is
    the wrong axis entirely, and confusing the two is how this section turns into a list of
